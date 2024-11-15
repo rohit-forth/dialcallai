@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import PageContainer from "@/components/layout/page-container";
 
 function ChatDetailPage() {
   const chatDetails = {
@@ -26,6 +27,7 @@ function ChatDetailPage() {
   };
 
   return (
+    <PageContainer scrollable>
     <div className="container mx-auto py-6 space-y-6 max-w-7xl">
       {/* Top Card with User Details */}
       <Card className="w-full">
@@ -182,6 +184,7 @@ function ChatDetailPage() {
         </CardContent>
       </Card>
     </div>
+    </PageContainer>
   );
 }
 export default function DashboardPage() {

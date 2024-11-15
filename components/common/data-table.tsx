@@ -94,6 +94,7 @@ export function DataTable<TData, TValue>({
     <div className="space-y-4">
       <ScrollArea className="h-100 rounded-md border border-common md:h-100">
         <Table className="relative">
+          
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

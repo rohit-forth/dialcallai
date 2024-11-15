@@ -15,9 +15,11 @@ import {
   Share2,
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import PageContainer from "@/components/layout/page-container";
 
 function DetailPage() {
   return (
+    <PageContainer scrollable>
     <div className="container mx-auto py-6 space-y-8 max-w-7xl">
       {/* Top Card with Call Details */}
       <Card className="w-full">
@@ -168,6 +170,7 @@ function DetailPage() {
         </Card>
       </section>
     </div>
+    </PageContainer>
   );
 }
 

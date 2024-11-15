@@ -40,6 +40,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   CreditCard,
+  MessagesSquare,
   GalleryVerticalEnd,
   LogOut
 } from 'lucide-react';
@@ -48,6 +49,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Breadcrumbs } from '../breadcrumbs';
+import ProfileImg from '@images/profileimg.png'
 import { Icons } from '../icons';
 import SearchInput from '../search-input';
 import ThemeToggle from './ThemeToggle/theme-toggle';
@@ -206,7 +208,7 @@ export default function AppSidebar({
             <div className='profile-card items-center  flex flex-row gap-4'>
               <div className='items-center flex flex-row gap-2' >
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarImage src={ProfileImg.src} />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
                 <p>John Doe</p>

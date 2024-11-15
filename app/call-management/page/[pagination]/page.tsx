@@ -1,20 +1,77 @@
 "use client"
-
 import * as React from "react"
 import { ColumnFiltersState, SortingState } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
+// import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import DashboardLayout from "@/app/dashboard/layout"
 import PageContainer from "@/components/layout/page-container"
-import { DataTable } from "../data-table"
+import { DataTable } from "@/components/common/data-table"
 
 
-import { Icons } from "@/components/icons"
-import { Checkbox } from "@/components/ui/checkbox"
+// import { Icons } from "@/components/icons"
+// import { Checkbox } from "@/components/ui/checkbox"
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
+import { EyeIcon } from "lucide-react"
 const data: any = [
+    {
+        id: "101",
+        job_title: "Social Media Assistant",
+        phone_no: "87587658768",
+        status: "In Progress",
+        created_at: "2024-10-15T10:20:00Z",
+        result: 85,
+        notes: "Review scheduled for next week",
+        dateAndTime: "15 Oct, 2024, 10:20 AM",
+        transcript: "Campaign strategy review"
+    },
+    {
+        id: "101",
+        job_title: "Social Media Assistant",
+        phone_no: "87587658768",
+        status: "In Progress",
+        created_at: "2024-10-15T10:20:00Z",
+        result: 85,
+        notes: "Review scheduled for next week",
+        dateAndTime: "15 Oct, 2024, 10:20 AM",
+        transcript: "Campaign strategy review"
+    },
+    
+
+    {
+        id: "101",
+        job_title: "Social Media Assistant",
+        phone_no: "87587658768",
+        status: "In Progress",
+        created_at: "2024-10-15T10:20:00Z",
+        result: 85,
+        notes: "Review scheduled for next week",
+        dateAndTime: "15 Oct, 2024, 10:20 AM",
+        transcript: "Campaign strategy review"
+    },
+    {
+        id: "101",
+        job_title: "Social Media Assistant",
+        phone_no: "87587658768",
+        status: "In Progress",
+        created_at: "2024-10-15T10:20:00Z",
+        result: 85,
+        notes: "Review scheduled for next week",
+        dateAndTime: "15 Oct, 2024, 10:20 AM",
+        transcript: "Campaign strategy review"
+    },
+    {
+        id: "101",
+        job_title: "Social Media Assistant",
+        phone_no: "87587658768",
+        status: "In Progress",
+        created_at: "2024-10-15T10:20:00Z",
+        result: 85,
+        notes: "Review scheduled for next week",
+        dateAndTime: "15 Oct, 2024, 10:20 AM",
+        transcript: "Campaign strategy review"
+    },
     {
         id: "101",
         job_title: "Social Media Assistant",
@@ -111,6 +168,9 @@ export type Payment = {
     dateAndTime: string
     transcript: string
     status: "Completed" | "In progress" | "success" | "failed"
+    job_title:string
+    created_at:string,
+    result:number,
 }
 
 
@@ -171,17 +231,15 @@ function DataTableDemo() {
         //                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
         //                     {status}
         //                 </span>
-        //             </div>
-        //         )
-        //     },
-        // },
+
+      
         {
             id: "actions",
             header: "Action",
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
                     <Link href={`/call-management/${1322}/view`} className="p-2 hover:bg-gray-100 rounded-full">
-                        <Icons.Eye />
+                    <EyeIcon color='gray'/>
                     </Link>
                     {/* <button className="p-2 hover:bg-gray-100 rounded-full">
                         <Icons.MoreHorizontal className="h-4 w-4" />
@@ -195,7 +253,7 @@ function DataTableDemo() {
 
     return (
         <PageContainer>
-            <div className="w-full">
+            <div className="container mx-auto p-6">
                 <div>
                     <p className="text-lg font-semibold mb-4">Call Management</p>
                 </div>

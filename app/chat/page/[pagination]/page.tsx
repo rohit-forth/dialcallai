@@ -1,16 +1,25 @@
 "use client"
-
+import Link from "next/link"
 import * as React from "react"
-import {ColumnFiltersState,SortingState,} from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { ColumnDef } from "@tanstack/react-table"
+// import {ColumnFiltersState,SortingState,} from "@tanstack/react-table"
+// import { Button } from "@/components/ui/button"
+// import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import DashboardLayout from "@/app/dashboard/layout"
 import PageContainer from "@/components/layout/page-container"
-import { DataTable } from "../data-table"
-import { columns } from "../column"
+import { DataTable } from "@/components/common/data-table"  
+//import { columns } from "../column"
+import { MessageSquare, MessageSquareDot, MessagesSquare } from "lucide-react"
 import { usePathname } from "next/navigation"
-
+export type Chat = {
+    id: string
+    amount: number
+    status: "pending" | "processing" | "success" | "failed"
+    email: string
+    phone_number: string
+    country: string
+  }
 const data: any = [
     {
         name: "Cameron Williamson",
@@ -18,51 +27,64 @@ const data: any = [
         phone_number: "N/A",
         country: "United States"
     },
-    {
-        name: "Cameron Williamson",
-        email: "c.williamson@gmail.com",
-        phone_number: "232323234",
-        country: "Canada"
-    },
-    {
-        name: "Albert Flores",
-        email: "a.flores@gmail.com",
-        phone_number: "232323234",
-        country: "United Kingdom"
-    },
-    {
-        name: "Courtney Henry",
-        email: "c.henry@gmail.com",
-        phone_number: "232323234",
-        country: "Australia"
-    },
-    {
-        name: "Savannah Nguyen",
-        email: "s.nguyen@gmail.com",
-        phone_number: "232323234",
-        country: "United States"
-    },
+  
     {
         name: "Cameron Williamson",
         email: "c.williamson@gmail.com",
         phone_number: "232323234",
         country: "India"
     },
-    {
-        name: "Savannah Nguyen",
-        email: "s.nguyen@gmail.com",
-        phone_number: "232323234",
-        country: "Canada"
-    },
-    {
-        name: "Jerome Bell",
-        email: "j.bell@gmail.com",
-        phone_number: "232323234",
-        country: "United Kingdom"
-    }
+
 ];
 
-
+const columns: ColumnDef<Chat>[] = [
+    {
+      header:"Sr. No.",
+      cell: ({ row }) => {
+        return <span>{row.index + 1}</span>; 
+      },
+    //   enableSorting: false,
+    //   enableHiding: false,
+    },
+  
+    {
+      accessorKey: "name",
+      header: "Name",
+    },
+    // {
+    //   accessorKey: "job_title",
+    //   header: "Job title",
+    // },
+    {
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      accessorKey: "phone_number",
+      header: "Phone Number",
+    },
+    // {
+    //   accessorKey: "email",
+    //   header: "Email",
+    // },
+  
+    {
+      accessorKey: "country",
+      header: "Country",
+    },
+    {
+      accessorKey:"chat",
+      header:"Chat",
+      cell: ({ row }) => (
+              <Link href={`/chat/${123}/view`} ><MessagesSquare/></Link>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    }
+    
+  
+  
+  ]
 export type Payment = {
     id: string
     job_title: string
@@ -75,10 +97,6 @@ export type Payment = {
 
 
 function Contact() {
-    const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-        []
-    )
 
 
     const pathname = usePathname();
@@ -86,7 +104,7 @@ function Contact() {
     return (
         <PageContainer>
 
-            <div className="w-full">
+            <div className="container mx-auto p-6">
                 <div>
                     <p className="heading">{"Chat"}</p>
                 </div>
@@ -104,7 +122,7 @@ function Contact() {
                 </div>
 
                 <div className=" mx-auto ">
-                    <DataTable columns={columns} data={data} totalItems={40}/>
+                    <DataTable columns={columns} data={data} totalItems={data.length}/>
                 </div>
                 {/* <div className="flex items-center justify-end space-x-2 py-4">
                     <div className="flex-1 text-sm text-muted-foreground">

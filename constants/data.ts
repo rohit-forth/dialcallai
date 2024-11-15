@@ -1,5 +1,6 @@
 import { NavItem } from '@/types';
 import { Icons } from '../components/icons';
+import { MessagesSquare } from 'lucide-react';
 export type User = {
   id: number;
   name: string;
@@ -126,7 +127,7 @@ navItems: NavItem[] = [
   {
     title: 'Dashboard',
     url: '/dashboard',
-    icon: 'DashBoard',
+    icon: 'Dashboard',
     isActive: false,
     items: []
   },
@@ -142,7 +143,7 @@ navItems: NavItem[] = [
   {
     title: 'Chat',
     url: '/chat/page/1',
-    icon: 'AiIcon',
+    icon: 'MessagesSquare',
     isActive: false,
     items: [
      

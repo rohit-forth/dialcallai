@@ -24,6 +24,7 @@ import {
   UserCheck,
   Volume2,
   Phone,
+  EyeIcon,
   PhoneIncoming,
   MessageSquare,
   Clock,
@@ -33,7 +34,7 @@ import { Icons } from '@/components/icons';
 import {
   ColumnDef,
 } from '@tanstack/react-table';
-import { DataTable } from "./data-table"
+import { DataTable } from '@/components/common/data-table';
 import { useRouter } from 'next/navigation';
 type Message = {
   id: number;
@@ -396,6 +397,7 @@ const Dashboard = () => {
     {
       accessorKey: 'srNo',
       header: 'Sr. No.',
+      cell:({row})=><div className="text-blue-500">{row.index + 1}</div>,
     },
     {
       accessorKey: 'type',
@@ -422,7 +424,7 @@ const Dashboard = () => {
         const [isSheetOpen, setIsSheetOpen] = useState(false);
         const [isLoading, setIsLoading] = useState(false);
         const [selectedRecord, setSelectedRecord] = useState(null);
-    
+        
         const handleViewRecord = async (record:any) => {
           setSelectedRecord(record);
           setIsLoading(true);
@@ -433,7 +435,7 @@ const Dashboard = () => {
           await new Promise(resolve => setTimeout(resolve, 1000));
           setIsLoading(false);
         };
-    
+      
         return (
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
@@ -441,7 +443,7 @@ const Dashboard = () => {
                 variant="ghost"
                 onClick={() => handleViewRecord(row.original)}
               >
-                <Icons.Eye />
+                <EyeIcon color='gray'/>
               </Button>
             </SheetTrigger>
             

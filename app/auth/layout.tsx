@@ -1,7 +1,7 @@
 "use client"
 import { Icons } from "@/components/icons";
 import { usePathname } from "next/navigation";
-export default function AuthLayout({ children,title,des }: { children: React.ReactNode,title:string,des:string }) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   console.log(pathname,"dfdfdsfff")
   return (
