@@ -13,6 +13,7 @@ import { Fragment } from 'react';
 
 export function Breadcrumbs() {
   const items = useBreadcrumbs();
+  console.log(items,"nakli breadcrumbs");
   if (items.length === 0) return null;
 
   return (

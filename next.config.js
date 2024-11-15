@@ -19,6 +19,7 @@ const nextConfig = {
   transpilePackages: ['geist'],
   webpack: (config) => {
     config.resolve.alias['@images'] = path.resolve(__dirname, 'assets/images');
+    config.resolve.alias['@icons'] = path.resolve(__dirname, 'assets/icons');
     return config;
   }
 };

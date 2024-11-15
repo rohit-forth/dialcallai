@@ -29,6 +29,9 @@
       "@images/*": [
         "./assets/images/*"
       ],
+      "@icons/*":[
+        "./assets/icons/*"
+      ]
     }
   },
   "include": [

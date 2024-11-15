@@ -41,7 +41,7 @@ const ProfileView = () => {
 
   return (
     <div className='p-7 min-h-screen bg-gray-50'>
-      <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+      <h2 className="text-2xl font-bold tracking-tight">Profile</h2>
       <div className='relative '>
         {/* Background Image */}
         <div className='w-full flex justify-center overflow-hidden'>

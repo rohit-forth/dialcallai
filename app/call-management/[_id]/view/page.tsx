@@ -20,7 +20,7 @@ import PageContainer from "@/components/layout/page-container";
 function DetailPage() {
   return (
     <PageContainer scrollable>
-    <div className="container mx-auto py-6 space-y-8 max-w-7xl">
+    <div className="container mx-auto py-6 space-y-6 max-w-7xl">
       {/* Top Card with Call Details */}
       <Card className="w-full">
         <CardHeader className="pb-4">

@@ -7,7 +7,7 @@ import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'DAIL AI',
+  title: 'DIAL AI',
   description: 'Basic dashboard with Next.js and Shadcn'
 };
 

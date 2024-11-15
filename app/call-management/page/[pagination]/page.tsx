@@ -37,7 +37,7 @@ const data: any = [
         dateAndTime: "15 Oct, 2024, 10:20 AM",
         transcript: "Campaign strategy review"
     },
-    
+
 
     {
         id: "101",
@@ -168,9 +168,9 @@ export type Payment = {
     dateAndTime: string
     transcript: string
     status: "Completed" | "In progress" | "success" | "failed"
-    job_title:string
-    created_at:string,
-    result:number,
+    job_title: string
+    created_at: string,
+    result: number,
 }
 
 
@@ -183,7 +183,7 @@ function DataTableDemo() {
 
     // Filter data based on active tab
     const filteredData = React.useMemo(() => {
-        return data.filter((item:any) => {
+        return data.filter((item: any) => {
             if (activeTab === "active") {
                 return item.status === "In Progress"
             }
@@ -232,14 +232,14 @@ function DataTableDemo() {
         //                     {status}
         //                 </span>
 
-      
+
         {
             id: "actions",
             header: "Action",
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
                     <Link href={`/call-management/${1322}/view`} className="p-2 hover:bg-gray-100 rounded-full">
-                    <EyeIcon color='gray'/>
+                        <EyeIcon color='gray' />
                     </Link>
                     {/* <button className="p-2 hover:bg-gray-100 rounded-full">
                         <Icons.MoreHorizontal className="h-4 w-4" />
@@ -253,17 +253,40 @@ function DataTableDemo() {
 
     return (
         <PageContainer>
-            <div className="container mx-auto p-6">
+            <div className="container mx-auto px-6 py-2">
                 <div>
-                    <p className="text-lg font-semibold mb-4">Call Management</p>
+                    <p className="heading mb-3">Call Management</p>
                 </div>
-                
+
                 <Tabs defaultValue="active" className="w-full mb-6" onValueChange={setActiveTab}>
-                    <TabsList className="grid rounded-2xl h-11 grid-cols-2 p-2">
-                        <TabsTrigger className={`p-1 rounded-xl ${activeTab==="active" ?"text-primary":""}`} value="active">Active Calls</TabsTrigger>
-                        <TabsTrigger className="p-1 rounded-xl" value="previous">Previous Calls</TabsTrigger>
+                    <TabsList className="grid grid-cols-2 h-12 p-1 bg-gray-100 rounded-full shadow-inner">
+                        <TabsTrigger
+                            className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "active"
+                                    ? "bg-primary text-white shadow-md"
+                                    : "text-gray-500 hover:bg-gray-200"
+                                }`}
+                            value="active"
+                        >
+                            <span className={`${activeTab === "active"
+                                    ? " text-blue-600 "
+                                    : "text-gray-500 hover:bg-gray-200"
+                                }`}> Active Calls</span>
+                        </TabsTrigger>
+                        <TabsTrigger
+                            className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "previous"
+                                    ? "bg-primary text-white shadow-md"
+                                    : "text-gray-500 hover:bg-gray-200"
+                                }`}
+                            value="previous"
+                        >
+                            <span className={`${activeTab === "previous"
+                                    ? " text-blue-600 "
+                                    : "text-gray-500 hover:bg-gray-200"
+                                }`}> Previous Calls</span>
+                        </TabsTrigger>
                     </TabsList>
-                    
+
+
                     <TabsContent value="active" className="mt-4">
                         <div className="flex justify-between items-center py-4">
                             <Input
@@ -273,14 +296,14 @@ function DataTableDemo() {
                             />
                         </div>
                         <div className="mx-auto">
-                            <DataTable 
-                                columns={columns} 
-                                data={filteredData} 
+                            <DataTable
+                                columns={columns}
+                                data={filteredData}
                                 totalItems={40}
                             />
                         </div>
                     </TabsContent>
-                    
+
                     <TabsContent value="previous" className="mt-4">
                         <div className="flex justify-between items-center py-4">
                             <Input
@@ -290,9 +313,9 @@ function DataTableDemo() {
                             />
                         </div>
                         <div className="mx-auto">
-                            <DataTable 
-                                columns={columns} 
-                                data={filteredData} 
+                            <DataTable
+                                columns={columns}
+                                data={filteredData}
                                 totalItems={40}
                             />
                         </div>

@@ -151,7 +151,7 @@ navItems: NavItem[] = [
   },
   {
     title:'Logout',
-    url:'/logout',
+    url:'#',
     icon:'LogoutRed',
     isActive:false,
   }

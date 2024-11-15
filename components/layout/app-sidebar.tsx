@@ -51,14 +51,10 @@ import * as React from 'react';
 import { Breadcrumbs } from '../breadcrumbs';
 import ProfileImg from '@images/profileimg.png'
 import { Icons } from '../icons';
-import SearchInput from '../search-input';
-import ThemeToggle from './ThemeToggle/theme-toggle';
-import { UserNav } from './user-nav';
-import logo from "@/app/assests/images/logo.png"
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+import ProjectIcon from "@icons/projecticon.svg"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import DialogContentCommon from '../modal/DialogueContentCommon';
+
 export const company = {
   name: 'Acme Inc',
   logo: GalleryVerticalEnd,
@@ -92,9 +88,10 @@ export default function AppSidebar({
       {/* ..........sidebar......... */}
       <Sidebar collapsible="icon">
         <SidebarHeader>
-          <div className=" border-b-2 pb-6 border-common  text-sidebar-primary-foreground">
-            <h1 className='text-4xl text-primary text-center'>DAIL AI</h1>
+          <div className=" border-b-2 pb-6 border-common flex justify-center text-sidebar-primary-foreground">
+            {/* <h1 className='text-4xl text-primary text-center'>DAIL AI</h1> */}
             {/* <Badge className=' h-[40px] common-bg hover:' variant="default"><Icons.BellIcon /></Badge> */}
+            <img src={ProjectIcon.src} alt="logo"  />
           </div>
         </SidebarHeader>
         <SidebarContent className="overflow-x-hidden ">
@@ -147,12 +144,12 @@ export default function AppSidebar({
                     tooltip={item.title}
                     isActive={pathname === item.url}
                   >
-                    {item.title === "Logout" ? (
+                    {/* {item.title === "Logout" ? (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Link href="#" className="flex items-center gap-2 text-sm ms-[9px]">
                             <Icon />
-                            <span>{item.title}</span>
+                            { <span>{item.title}</span>}
                           </Link>
                         </AlertDialogTrigger>
                         <DialogContentCommon 
@@ -163,16 +160,25 @@ export default function AppSidebar({
                           onConfirm={() => signOut()}
                         />
                       </AlertDialog>
-                    ) : (
-                      <Link href={item.url}>
+                    ) : ( */}
+                      <Link onClick={()=>( item.title==="Logout" && setLogoutBtn(true))} href={item.url}>
                         <Icon />
                         <span>{item.title}</span>
                       </Link>
-                    )}
+                    {/* )} */}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                
                 );
               })}
+                {<AlertDialog open={logoutBtn} onOpenChange={setLogoutBtn}><DialogContentCommon 
+                          className="bg-danger text-white" 
+                          submitText="Yes, logout" 
+                          title="Confirm Logout" 
+                          des="Are you sure you want to logout from your account?" 
+                          onConfirm={() => signOut()}
+                        />
+                        </AlertDialog>}
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
@@ -181,43 +187,29 @@ export default function AppSidebar({
 
       {/* ......header...... */}
       <SidebarInset>
-        <header className="header flex h-16 shrink-0 items-center gap-2 justify-between transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        <header className="header flex mt-2 mr-2 ml-2 rounded-xl h-16 shrink-0 items-center gap-2 justify-between transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumbs />
           </div>
           <div className='flex gap-2 px-4'>
-            {/* card one */}
-            {/* <div className='profile-card-1 bg-white rounded-lg p-4 flex  items-center flex-row gap-4'> */}
-              {/* <div className='flex justify-center gap-1 items-center'><span><Icons.Wallet /></span>
-                <p className='font-medium text-sm'>540</p></div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <span><Icons.DownCircleArrow /></span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent> */}
-                  {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
-                  {/* <DropdownMenuSeparator /> */}
-                  {/* <DropdownMenuItem>Profile</DropdownMenuItem> */}
-                {/* </DropdownMenuContent>
-              </DropdownMenu> */}
-
+         
             {/* </div> */}
             {/* card 2 */}
-            <div className='profile-card items-center  flex flex-row gap-4'>
-              <div className='items-center flex flex-row gap-2' >
+            <div className='profile-card items-center  flex flex-row gap-2'>
+              <div className='items-center flex flex-row gap-1' >
                 <Avatar>
                   <AvatarImage src={ProfileImg.src} />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <p>John Doe</p>
+                <p className='text-md'>John Doe</p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <span><Icons.DownCircleArrow /></span>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className='relative right-4 p-2 font-semibold bg-white'>
+                <DropdownMenuContent className='relative right-6 p-2 font-semibold bg-white'>
                   <DropdownMenuItem asChild>
                     <Link href="/profile"><Icons.Profile /><span className='ml-2'>My Profile</span></Link>
                   </DropdownMenuItem>

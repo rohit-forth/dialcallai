@@ -104,7 +104,7 @@ function Contact() {
     return (
         <PageContainer>
 
-            <div className="container mx-auto p-6">
+            <div className="container mx-auto px-6 py-2">
                 <div>
                     <p className="heading">{"Chat"}</p>
                 </div>

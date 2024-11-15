@@ -7,7 +7,10 @@
 
 @layer base {
   :root {
-
+    --scrollbar-width: 12px;
+    --scrollbar-thumb-color: theme('colors.blue.500');
+    --scrollbar-track-color: theme('colors.gray.200');
+    --scrollbar-track-radius: theme('borderRadius.lg');
     --background: 0, 0%, 100%, 1;
     --foreground: 20 51% 4%;
     --muted: 20 25% 86%;
@@ -81,6 +84,8 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
+  
 }
 
 @layer base {
@@ -182,7 +187,7 @@
 /* profile card */
 .profile-card {
   background-color: #fff;
-  padding: 7px;
+  padding: 5px;
   border-radius: 34px;
 }
 
@@ -219,3 +224,8 @@ main {
 .theme-background {
   background-color: #323452;
 }
+
+/* Global styles */
+
+
+/* Customize the scrollbar */
