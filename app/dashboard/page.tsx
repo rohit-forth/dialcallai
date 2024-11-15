@@ -1,14 +1,5 @@
 "use client"
 import React, { useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  
-} from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -18,149 +9,258 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Loader2,
-
-
-
   Mail,
   Globe,
   PhoneCall,
   User,
   CalendarClock,
   MessageCircle,
- 
-  VolumeX,
-  Volume2,
-   
- 
   TrendingUp, 
-  TrendingDown, 
-
   Users,
   PhoneOutgoing,
-  
   PhoneMissed,
   Timer,
   MessagesSquare,
   UserCheck,
+  Volume2,
   Phone,
   PhoneIncoming,
-  PhoneOutgoingIcon,
   MessageSquare,
   Clock,
-  ChevronLeftIcon,
-  ChevronRightIcon
 } from 'lucide-react';
 import PageContainer from '@/components/layout/page-container';
 import { Icons } from '@/components/icons';
-import { parseAsInteger, useQueryState } from 'nuqs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
 import {
   ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  PaginationState,
-  useReactTable
 } from '@tanstack/react-table';
+import { DataTable } from "./data-table"
 import { useRouter } from 'next/navigation';
+type Message = {
+  id: number;
+  content: string;
+  sender: 'user' | 'agent';
+  timestamp: string;
+};
+
+type RecordType = {
+  id: number;
+  type: 'call' | 'chat';
+  srNo: string;
+  phoneNo?: string;
+  dateTime: string;
+  status: string;
+  transcript?: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  country?: string;
+  chatContent?: Message[];
+  duration?: string;
+  callType?: 'incoming' | 'outgoing';
+  department?: string;
+  agentName?: string;
+  callStatus?: 'completed' | 'missed' | 'ongoing';
+};
+
+const ChatMessage = ({ message }: { message: Message }) => (
+  <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`flex items-start max-w-[70%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
+      <Avatar className="w-8 h-8">
+        <AvatarImage src={message.sender === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
+        <AvatarFallback>{message.sender === 'user' ? 'U' : 'A'}</AvatarFallback>
+      </Avatar>
+      <div className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}>
+        <div className={`rounded-lg p-3 ${
+          message.sender === 'user' 
+            ? 'bg-primary text-primary-foreground' 
+            : 'bg-muted'
+        }`}>
+          {message.content}
+        </div>
+        <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+          <Clock className="w-3 h-3" />
+          {message.timestamp}
+        </span>
+      </div>
+    </div>
+  </div>
+);
+const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord: RecordType | null }) => {
+  if (!selectedRecord) return null;
+  
+  return (
+    <div className="space-y-6">
+     {isLoading ? (
+              <div className="flex min-h-screen items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : selectedRecord && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg mt-4 font-semibold flex items-center gap-2">
+                    {selectedRecord.type === 'call' ? (
+                      <>
+                        <PhoneCall className="h-5 w-5" />
+                        Call Details
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="h-5 w-5" />
+                        Chat Details
+                      </>
+                    )}
+                  </h3>
+                  <Badge variant={selectedRecord.type === 'call' ? 'default' : 'secondary'}>
+                    {selectedRecord.type.toUpperCase()}
+                  </Badge>
+                </div>
+                
+                <Separator />
+                
+                {selectedRecord.type === 'call' ? (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">Phone Number</p>
+                              <p className="font-medium">{selectedRecord.phoneNo}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">Agent</p>
+                              <p className="font-medium">{selectedRecord.agentName}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">Duration</p>
+                              <p className="font-medium">{selectedRecord.duration}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            {selectedRecord.callType === 'incoming' ? (
+                              <PhoneIncoming className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <PhoneOutgoing className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <div>
+                              <p className="text-sm text-muted-foreground">Call Type</p>
+                              <p className="font-medium capitalize">{selectedRecord.callType}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <Volume2 className="h-4 w-4" />
+                        Call Transcript
+                      </h4>
+                      <ScrollArea className="max-h-[400px] overflow-y-scroll w-full rounded-md border p-4">
+                        <div className="whitespace-pre-line">
+                          {selectedRecord.transcript}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">Name</p>
+                              <p className="font-medium">{selectedRecord.name}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">Email</p>
+                              <p className="font-medium">{selectedRecord.email}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">Phone</p>
+                              <p className="font-medium">{selectedRecord.phoneNumber}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">Country</p>
+                              <p className="font-medium">{selectedRecord.country}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        Chat History
+                      </h4>
+                      <ScrollArea className="max-h-[450px] overflow-y-scroll w-full rounded-md border p-4 bg-background">
+                        <div className="space-y-4">
+                          {selectedRecord.chatContent?.map((message:any) => (
+                            <ChatMessage key={message.id} message={message} />
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+    </div>
+  );
+};
+
 const Dashboard = () => {
-  const columns: ColumnDef<RecordType>[] = [
-    {
-      accessorKey: 'srNo',
-      header: 'Sr. No.',
-    },
-    {
-      accessorKey: 'type',
-      header: 'Type',
-      cell: ({ row }) => (
-        <Badge variant={row.original.type === 'call' ? 'default' : 'secondary'}>
-          {row.original.type.toUpperCase()}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: 'phoneNo',
-      header: 'Phone/Name',
-      cell: ({ row }) => (row.original.type === 'call' ? row.original.phoneNo : row.original.name),
-    },
-    {
-      accessorKey: 'dateTime',
-      header: 'Date and Time',
-    },
-    {
-      accessorKey: 'action',
-      header: 'Action',
-      cell: ({ row }) => (
-        <Button variant="ghost" onClick={() => handleViewRecord(row.original)}>
-          <Icons.Eye />
-        </Button>
-      ),
-    },
-  ];
 
-  type Message = {
-    id: number;
-    content: string;
-    sender: 'user' | 'agent';
-    timestamp: string;
-  };
+  //table columns
 
-  type RecordType = {
-    id: number;
-    type: 'call' | 'chat';
-    srNo: string;
-    phoneNo?: string;
-    dateTime: string;
-    status: string;
-    transcript?: string;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    country?: string;
-    chatContent?: Message[];
-    duration?: string;
-    callType?: 'incoming' | 'outgoing';
-    department?: string;
-    agentName?: string;
-    callStatus?: 'completed' | 'missed' | 'ongoing';
-  };
-
-  const [selectedRecord, setSelectedRecord] = useState<RecordType | null>(null);
+  // const [selectedRecord, setSelectedRecord] = useState<RecordType | null>(null);
   const router=useRouter()
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useQueryState(
-    'page',
-    parseAsInteger.withOptions({ shallow: false }).withDefault(1)
-  );
-  const [pageSize, setPageSize] = useQueryState(
-    'limit',
-    parseAsInteger
-      .withOptions({ shallow: false, history: 'push' })
-      .withDefault(10)
-  );
-  const totalItems=50;
-  const paginationState = {
-    pageIndex: currentPage - 1, // zero-based index for React Table
-    pageSize: pageSize
-  };
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const pageCount = Math.ceil(20 / pageSize);
-  const handlePaginationChange = (
-    updaterOrValue:
-      | PaginationState
-      | ((old: PaginationState) => PaginationState)
-  ) => {
-    const pagination =
-      typeof updaterOrValue === 'function'
-        ? updaterOrValue(paginationState)
-        : updaterOrValue;
-
-    setCurrentPage(pagination.pageIndex + 1); // converting zero-based index to one-based
-    setPageSize(pagination.pageSize);
-  };
-  const pageSizeOptions = [10, 20, 30, 40, 50]
   const listingData: RecordType[] = [
     {
       id: 1,
@@ -292,29 +392,75 @@ const Dashboard = () => {
       ]
     }
   ];
-  const table = useReactTable({
-    data: listingData,
-    columns,
-    pageCount: pageCount,
-    state: {
-      pagination: paginationState
+  const columns: ColumnDef<RecordType>[] = [
+    {
+      accessorKey: 'srNo',
+      header: 'Sr. No.',
     },
-    onPaginationChange: handlePaginationChange,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    manualPagination: true,
-    manualFiltering: true
-  });
- 
-  // Mock data for cards
-  // const cardData = {
-  //   activeCalls: 5,
-  //   totalCalls: 150,
-  //   totalChats: 75
-  // };
-
-  // Enhanced mock data
- 
+    {
+      accessorKey: 'type',
+      header: 'Type',
+      cell: ({ row }) => (
+        <Badge variant={row.original.type === 'call' ? 'default' : 'secondary'}>
+          {row.original.type.toUpperCase()}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: 'phoneNo',
+      header: 'Phone/Name',
+      cell: ({ row }) => (row.original.type === 'call' ? row.original.phoneNo : row.original.name),
+    },
+    {
+      accessorKey: 'dateTime',
+      header: 'Date and Time',
+    },
+    {
+      accessorKey: 'action',
+      header: 'Action',
+      cell: ({ row }) => {
+        const [isSheetOpen, setIsSheetOpen] = useState(false);
+        const [isLoading, setIsLoading] = useState(false);
+        const [selectedRecord, setSelectedRecord] = useState(null);
+    
+        const handleViewRecord = async (record:any) => {
+          setSelectedRecord(record);
+          setIsLoading(true);
+          // Keep the sheet open while loading
+          setIsSheetOpen(true);
+          
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          setIsLoading(false);
+        };
+    
+        return (
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                onClick={() => handleViewRecord(row.original)}
+              >
+                <Icons.Eye />
+              </Button>
+            </SheetTrigger>
+            
+            <SheetContent
+              className="w-[100%] sm:w-[70%] md:w-[60%] lg:w-[50%] xl:w-[40%] 
+              max-w-[100%] sm:max-w-[80%] md:max-w-[70%] lg:max-w-[70%] xl:max-w-[50%]
+              max-h-screen overflow-y-auto"
+              side="right"
+            >
+              <SheetContentComponent 
+                isLoading={isLoading }
+                selectedRecord={selectedRecord }
+              />
+            </SheetContent>
+          </Sheet>
+        );
+      },
+    },
+  ];
 
   const cardData = {
     activeCalls: {
@@ -343,42 +489,20 @@ const Dashboard = () => {
     }
   };
 
-  const handleViewRecord = async (record: RecordType) => {
-    setIsLoading(true);
-    setIsSheetOpen(true);
-    setSelectedRecord(record);
+  // const handleViewRecord = async (record: RecordType) => {
+  //   setIsLoading(true);
+  //   setIsSheetOpen(true);
+  //   setSelectedRecord(record);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-  };
+  //   // Simulate API call
+  //   await new Promise(resolve => setTimeout(resolve, 1000));
+  //   setIsLoading(false);
+  // };
 
-  const ChatMessage = ({ message }: { message: Message }) => (
-    <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`flex items-start max-w-[70%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={message.sender === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
-          <AvatarFallback>{message.sender === 'user' ? 'U' : 'A'}</AvatarFallback>
-        </Avatar>
-        <div className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}>
-          <div className={`rounded-lg p-3 ${
-            message.sender === 'user' 
-              ? 'bg-primary text-primary-foreground' 
-              : 'bg-muted'
-          }`}>
-            {message.content}
-          </div>
-          <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {message.timestamp}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
+ 
 
   return (
-    // <PageContainer scrollable>
+    <PageContainer scrollable>
       <div className="container mx-auto p-6">
         {/* Dashboard Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -552,312 +676,19 @@ const Dashboard = () => {
         </div>
 
 
-        {/* Combined Listing with Sliding Panel */}
-        <div className="flex">
-          <div className="flex-1 ">
-          <ScrollArea className="h-100 rounded-md border border-common md:h-100">
-            <Table >
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Sr. No.</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Phone/Name</TableHead>
-                  <TableHead>Date and Time</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {listingData.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>{record.srNo}</TableCell>
-                    <TableCell>
-                      <Badge variant={record.type === 'call' ? 'default' : 'secondary'}>
-                        {record.type.toUpperCase()}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{record.type === 'call' ? record.phoneNo : record.name}</TableCell>
-                    <TableCell>{record.dateTime}</TableCell>
-                    <TableCell>
-                      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                        <SheetTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            onClick={() => handleViewRecord(record)}
-                          >
-                            <Icons.Eye />
-                          </Button>
-                        </SheetTrigger>
-                        
-                        <SheetContent
-                          className="w-[100%]  sm:w-[70%] md:w-[60%] lg:w-[50%] xl:w-[40%] 
-                          max-w-[100%]  sm:max-w-[80%] md:max-w-[70%] lg:max-w-[70%] xl:max-w-[50%]
-                          h-full overflow-y-auto"
-                          side="right"
-                        >
-                          {isLoading ? (
-                            <div className="flex items-center justify-center h-full">
-                              <Loader2 className="h-8 w-8 animate-spin" />
-                            </div>
-                          ) : selectedRecord && (
-                            <div className="space-y-6">
-                              <div className="flex items-center  justify-between">
-                                <h3 className="text-lg mt-4 font-semibold flex items-center gap-2">
-                                  {selectedRecord.type === 'call' ? (
-                                    <>
-                                      <PhoneCall className="h-5 w-5" />
-                                      Call Details
-                                    </>
-                                  ) : (
-                                    <>
-                                      <MessageCircle className="h-5 w-5" />
-                                      Chat Details
-                                    </>
-                                  )}
-                                </h3>
-                                <Badge variant={selectedRecord.type === 'call' ? 'default' : 'secondary'}>
-                                  {selectedRecord.type.toUpperCase()}
-                                </Badge>
-                              </div>
-                              
-                              <Separator />
-                              
-                              {selectedRecord.type === 'call' ? (
-                                <div className="space-y-6">
-                                  <div className="grid grid-cols-2 gap-4 ">
-                                    <Card>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                          <Phone className="h-4 w-4 text-muted-foreground" />
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Phone Number</p>
-                                            <p className="font-medium">{selectedRecord.phoneNo}</p>
-                                          </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                    <Card>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                          <User className="h-4 w-4 text-muted-foreground" />
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Agent</p>
-                                            <p className="font-medium">{selectedRecord.agentName}</p>
-                                          </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                    <Card>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                          <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Duration</p>
-                                            <p className="font-medium">{selectedRecord.duration}</p>
-                                          </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                    <Card>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                          {selectedRecord.callType === 'incoming' ? (
-                                            <PhoneIncoming className="h-4 w-4 text-muted-foreground" />
-                                          ) : (
-                                            <PhoneOutgoingIcon className="h-4 w-4 text-muted-foreground" />
-                                          )}
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Call Type</p>
-                                            <p className="font-medium capitalize">{selectedRecord.callType}</p>
-                                          </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                  
-                                  <div mb-3>
-                                    <h4 className="font-medium mb-2 flex items-center gap-2">
-                                      <Volume2 className="h-4 w-4" />
-                                      Call Transcript
-                                    </h4>
-                                    <ScrollArea className=" max-h-[400px] overflow-y-scroll w-full rounded-md border p-4">
-                                      <div className="whitespace-pre-line">
-                                        {selectedRecord.transcript}
-                                      </div>
-                                    </ScrollArea>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="space-y-6">
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <Card>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                          <User className="h-4 w-4 text-muted-foreground" />
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Name</p>
-                                            <p className="font-medium">{selectedRecord.name}</p>
-                                          </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                    <Card>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                          <Mail className="h-4 w-4 text-muted-foreground" />
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Email</p>
-                                            <p className="font-medium">{selectedRecord.email}</p>
-                                          </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                    <Card>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                          <Phone className="h-4 w-4 text-muted-foreground" />
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Phone</p>
-                                            <p className="font-medium">{selectedRecord.phoneNumber}</p>
-                                          </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                
-                                    <Card>
-                                      <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                          <Globe className="h-4 w-4 text-muted-foreground" />
-                                          <div>
-                                            <p className="text-sm text-muted-foreground">Country</p>
-                                            <p className="font-medium">{selectedRecord.country}</p>
-                                          </div>
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-
-                                  <div>
-                                    <h4 className="font-medium mb-2 flex items-center gap-2">
-                                      <MessageSquare className="h-4 w-4" />
-                                      Chat History
-                                    </h4>
-                                    <ScrollArea className="max-h-[450px] overflow-y-scroll w-full rounded-md border p-4 bg-background">
-                                      <div className="space-y-4">
-                                        {selectedRecord.chatContent?.map((message) => (
-                                          <ChatMessage key={message.id} message={message} />
-                                        ))}
-                                      </div>
-                                    </ScrollArea>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </SheetContent>
-                      </Sheet>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-            <div className="flex flex-col items-center justify-end gap-2 space-x-2 py-4 sm:flex-row">
-        <div className="flex w-full items-center justify-between">
-          <div className="flex-1 text-sm text-muted-foreground">
-            {totalItems > 0 ? (
-              <>
-                Showing{' '}
-                {paginationState.pageIndex * paginationState.pageSize + 1} to{' '}
-                {Math.min(
-                  (paginationState.pageIndex + 1) * paginationState.pageSize,
-                  totalItems
-                )}{' '}
-                of {totalItems} entries
-              </>
-            ) : (
-              'No entries found'
-            )}
-          </div>
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
-            <div className="flex items-center space-x-2">
-              <p className="whitespace-nowrap text-sm font-medium">
-                Rows per page
-              </p>
-              <Select
-                value={`${paginationState.pageSize}`}
-                onValueChange={(value) => {
-                  table.setPageSize(Number(value));
-                }}
-              >
-                <SelectTrigger className="h-8 w-[70px]">
-                  <SelectValue placeholder={paginationState.pageSize} />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {pageSizeOptions.map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-        <div className="flex w-full items-center justify-between gap-2 sm:justify-end">
-          <div className="flex w-[150px] items-center justify-center text-sm font-medium">
-            {totalItems > 0 ? (
-              <>
-                Page {paginationState.pageIndex + 1} of {table.getPageCount()}
-              </>
-            ) : (
-              'No pages'
-            )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              aria-label="Go to first page"
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <DoubleArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
-            </Button>
-            <Button
-              aria-label="Go to previous page"
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
-            </Button>
-            <Button
-              aria-label="Go to next page"
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
-            </Button>
-            <Button
-              aria-label="Go to last page"
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              <DoubleArrowRightIcon className="h-4 w-4" aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
+        {/*Data Table */}
+      
+        
+          <DataTable
+            columns={columns}
+            data={listingData}
+            totalItems={40}
+          />
+            
+      
+    
       </div>
-          </div>
-        </div>
-      </div>
-    // </PageContainer>
+     </PageContainer>
   );
 };
 
