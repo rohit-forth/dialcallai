@@ -34,9 +34,9 @@ function DetailPage() {
                   Completed
                 </Badge>
               </div>
-              <CardTitle className="text-2xl font-bold">
+              {/* <CardTitle className="text-2xl font-bold">
                 Sales Call with John Doe
-              </CardTitle>
+              </CardTitle> */}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex gap-2">
@@ -51,7 +51,7 @@ function DetailPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-50 rounded-lg">
                 <Calendar className="h-5 w-5 text-blue-500" />
@@ -70,7 +70,7 @@ function DetailPage() {
                 <p className="font-medium">45 minutes</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-50 rounded-lg">
                 <User className="h-5 w-5 text-blue-500" />
               </div>
@@ -78,7 +78,7 @@ function DetailPage() {
                 <p className="text-sm text-muted-foreground">Participant</p>
                 <p className="font-medium">John Doe</p>
               </div>
-            </div>
+            </div> */}
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-50 rounded-lg">
                 <Phone className="h-5 w-5 text-blue-500" />

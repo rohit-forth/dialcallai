@@ -70,6 +70,7 @@ export default function AppSidebar({
   const { data: session } = useSession();
   const router = useRouter()
   const pathname = usePathname();
+  console.log("pathname",pathname)
   const [logoutBtn, setLogoutBtn] = React.useState(false);
   // Only render after first client-side mount
   React.useEffect(() => {
@@ -82,6 +83,29 @@ export default function AppSidebar({
   if (!mounted) {
     return null; // or a loading skeleton
   }
+
+   
+  const isActiveRoute = (itemUrl: string) => {
+    // Handle each route type explicitly
+    switch (itemUrl) {
+      case '/dashboard':
+        return pathname === '/dashboard';
+        
+      case '/chat/page/1':
+        return pathname === '/chat/page/1' || 
+               pathname.match(/^\/chat\/\d+\/view/);
+        
+      case '/call-management/page/1':
+        return pathname === '/call-management/page/1' || 
+               pathname.match(/^\/call-management\/\d+\/view/);
+               
+      case '#': // Logout
+        return false;
+        
+      default:
+        return pathname === itemUrl;
+    }
+  };
 
   return (
     <SidebarProvider className='sidebar-layout'>
@@ -122,15 +146,15 @@ export default function AppSidebar({
                         <SidebarMenuSub>
                           {item.items?.map((subItem) => (
                             <SidebarMenuSubItem key={subItem.title}>
-                              <SidebarMenuSubButton
+                                <SidebarMenuSubButton
                                 asChild
-                                isActive={pathname === subItem.url}
-                              >
-                              <Link href={item.title!=="Logout"?item.url:"#"}>
-                        <Icon />
-                        <span onClick={()=>item.title==="Logout"?setLogoutBtn(true):""} >{item.title}</span>
-                      </Link>
-                              </SidebarMenuSubButton>
+                                isActive={pathname?.includes(subItem.url)}
+                                >
+                                <Link href={item.title!=="Logout"?item.url:"#"}>
+                            <Icon />
+                            <span onClick={()=>item.title==="Logout"?setLogoutBtn(true):""} >{item.title}</span>
+                            </Link>
+                                </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                           ))}
                         </SidebarMenuSub>
@@ -142,7 +166,7 @@ export default function AppSidebar({
                   <SidebarMenuButton
                     asChild
                     tooltip={item.title}
-                    isActive={pathname === item.url}
+                    isActive={!!isActiveRoute(item.url)}
                   >
                     {/* {item.title === "Logout" ? (
                       <AlertDialog>
@@ -193,7 +217,7 @@ export default function AppSidebar({
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumbs />
           </div>
-          <div className='flex gap-2 px-4'>
+         <Link href={"/profile"} className='no-underline'><div className='flex gap-2 px-4 cursor-pointer'>
          
             {/* </div> */}
             {/* card 2 */}
@@ -247,7 +271,7 @@ export default function AppSidebar({
               </div> */}
             </div>
           </div>
-
+          </Link> 
 
           {/* <div className=" hidden w-1/3 items-center gap-2 px-4 md:flex ">
             <SearchInput />

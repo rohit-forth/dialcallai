@@ -181,7 +181,9 @@
 
 /* ....................sidebar-layout................... */
 
-
+.common-btn{
+  background-color:  hsla(236, 24%, 26%, 1);
+}
 
 
 /* profile card */
