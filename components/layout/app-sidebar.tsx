@@ -54,6 +54,7 @@ import { Icons } from '../icons';
 import ProjectIcon from "@icons/projecticon.svg"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import DialogContentCommon from '../modal/DialogueContentCommon';
+import { useGlobalContext } from '../providers/Provider';
 
 export const company = {
   name: 'Acme Inc',
@@ -67,8 +68,9 @@ export default function AppSidebar({
   children: React.ReactNode;
 }) {
   const [mounted, setMounted] = React.useState(false);
-  const { data: session } = useSession();
+ 
   const router = useRouter()
+  const {userInfo}=useGlobalContext()
   const pathname = usePathname();
   console.log("pathname",pathname)
   const [logoutBtn, setLogoutBtn] = React.useState(false);
@@ -227,7 +229,7 @@ export default function AppSidebar({
                   <AvatarImage src={ProfileImg.src} />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <p className='text-md'>John Doe</p>
+                <p className='text-md'>{userInfo?.name}</p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

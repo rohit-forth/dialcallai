@@ -1,29 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, EyeOff } from "lucide-react";
-
+import { useGlobalContext } from '../providers/Provider';
+import Profile_image from '@images/profileimg.png';
+// import { Upload } from "@/components/ui/upload";
 interface UserProfile {
-  firstName: string;
-  lastName: string;
-  company: string;
+ name:string,
+  
   email: string;
-  contact: string;
-}
-
-interface PasswordForm {
-  oldPassword: string;
-  newPassword: string;
-  confirmPassword: string;
+  
 }
 
 interface AccountModalProps {
@@ -31,28 +23,21 @@ interface AccountModalProps {
   onSave?: (data: UserProfile) => Promise<void>;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
-
 }
 
 const AccountModal: React.FC<AccountModalProps> = ({
-  initialData = {
-    firstName: "John",
-    lastName: "Doe",
-    company: "Gladiator Ltd.",
-    email: "john.doe@gmail.com",
-    contact: "+61 975 157 8462"
-  },
+  
   isOpen,
   setIsOpen,
   onSave,
-
 }) => {
   const [isLoading, setIsLoading] = useState(false);
- 
+  const {userInfo} = useGlobalContext();
+  const displayName=userInfo?.name;
+  const [profileData, setProfileData] = useState<any>(userInfo);
+  const isInitializedRef = useRef(false);
 
-
-  const [profileData, setProfileData] = useState<UserProfile>(initialData);
- 
+  // Initialize form data only once when modal is first opened
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +45,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
       setIsLoading(true);
       try {
         await onSave(profileData);
+        setIsOpen(false);
       } catch (error) {
         console.error('Error saving profile:', error);
       } finally {
@@ -68,99 +54,82 @@ const AccountModal: React.FC<AccountModalProps> = ({
     }
   };
 
-
-
+  const handleInputChange = (field: keyof UserProfile) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setProfileData((prev:any) => ({
+      ...prev,
+      [field]: e.target.value
+    }));
+  };
+  const handleFileUpload = (file: File) => {
+    // Handle file upload logic here
+    console.log('Uploaded file:', file);
+  };
 
   return (
-<div className="relative flex justify-center">
-  <div className="fixed inset-0 z-50 flex items-center justify-center">
-    <div className="relative w-full max-w-md">
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-md p-6 ">
-          <p className="text-lg font-semibold">Profile settings</p>
-          
-          <form onSubmit={handleProfileSubmit} className="mt-2 space-y-4">
-                  {/* Profile content */}
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-gray-200" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{`${profileData.firstName} ${profileData.lastName}`}</p>
-                      <Button type="button" variant="outline" size="sm" className="mt-1">
-                        Change
-                      </Button>
-                    </div>
-                  </div>
-                  {/* Additional form fields */}
-                  <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">First name</label>
-                        <Input
-                          value={profileData.firstName}
-                          onChange={(e) => setProfileData(prev => ({
-                            ...prev,
-                            firstName: e.target.value
-                          }))}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Last name</label>
-                        <Input
-                          value={profileData.lastName}
-                          onChange={(e) => setProfileData(prev => ({
-                            ...prev,
-                            lastName: e.target.value
-                          }))}
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Company name</label>
-                      <Input
-                        value={profileData.company}
-                        onChange={(e) => setProfileData(prev => ({
-                          ...prev,
-                          company: e.target.value
-                        }))}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Email</label>
-                      <Input
-                        type="email"
-                        value={profileData.email}
-                        onChange={(e) => setProfileData(prev => ({
-                          ...prev,
-                          email: e.target.value
-                        }))}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Contact details</label>
-                      <Input
-                        value={profileData.contact}
-                        onChange={(e) => setProfileData(prev => ({
-                          ...prev,
-                          contact: e.target.value
-                        }))}
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  <Button type="submit" className=" flex common-btn text-white ms-auto" disabled={isLoading}>
-                    {isLoading ? "Saving..." : "Save changes"}
-                  </Button>
-                </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  </div>
-</div>
+    <div className="relative flex justify-center">
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="relative w-full max-w-md">
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="max-w-md p-6">
+              <p className="text-lg font-semibold">Profile Settings</p>
+              
+              <form onSubmit={handleProfileSubmit} className="mt-2 space-y-4">
+                <div className="flex items-center gap-4">
+                <Avatar className="w-14 h-14">
+          <AvatarImage src={Profile_image.src} />
+          <AvatarFallback>{"SA"}</AvatarFallback>
+        </Avatar>
+                  <div className="flex justify-between w-full items-center">
+                    <p className="text-sm font-medium">{`${displayName}`}</p>
+                    {/* <Button type="button" variant="outline" size="sm" className="mt-1">
+                      Change
+                    </Button>
+                 */}
 
+                  
+
+              <Input type="file" className='w-[50px]'/>
+                  </div>
+                </div>
+                
+                <div className="grid gap-4">
+
+                    <div>
+                      <label className="text-sm font-medium">Name</label>
+                      <Input
+                        value={profileData.name}
+                        onChange={handleInputChange('name')}
+                        className="mt-1"
+                      />
+                    </div>
+                
+                  
+                  <div>
+                    <label className="text-sm font-medium">Email</label>
+                    <Input
+                      type="email"
+                      value={profileData.email}
+                      onChange={handleInputChange('email')}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="flex common-btn text-white ms-auto" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Saving..." : "Save changes"}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    </div>
   );
 };
 

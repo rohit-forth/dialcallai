@@ -10,17 +10,21 @@ import { Progress } from '@/components/ui/progress';
 import { Icons } from "@/components/icons"
 import DashboardLayout from '../dashboard/layout';
 import { Separator } from '@/components/ui/separator';
+import { useGlobalContext } from '@/components/providers/Provider';
 import AccountModal from '@/components/modal/account-and-password';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Bell, Delete, EarthIcon, HelpCircle, Lock, Shield, Trash } from 'lucide-react';
 import Page from '../(auth)/(signin)/page';
 import PageContainer from '@/components/layout/page-container';
 import PasswordChangeDialog from '@/components/modal/passwordmodal';
+import henceforthApi from '@/utils/henceforthApi';
+import toast from 'react-hot-toast';
 
 const ProfileView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
+  const { userInfo,getProfile } = useGlobalContext();
+  console.log(userInfo);
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -31,7 +35,20 @@ const ProfileView = () => {
 
   const handleSaveProfile = async (data: any) => {
     console.log('Saving profile:', data);
-    handleCloseModal();
+    const payload = {
+      email:data?.email,
+      name:data?.name,
+    }
+    try {
+     const apiRes=await henceforthApi.SuperAdmin.updateProfile(data);
+     toast.success("Profile Updated Successfully");
+     getProfile()
+    } catch (error) {
+      
+    }finally{
+
+      handleCloseModal();
+    }
   };
 
   const handlePasswordChange = async (data: any) => {
@@ -69,13 +86,13 @@ const ProfileView = () => {
               
               <Avatar className='h-[100px] w-[100px] sm:h-[140px] sm:w-[140px] -mt-16 sm:-mt-28  border-white'>
                 <AvatarImage src={Profile_image.src} className='w-full h-full' alt='John Doe' />
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarFallback>SA</AvatarFallback>
               </Avatar>
               
               <div className='mt-4 text-center'>
-                <h2 className='text-xl sm:text-2xl font-semibold'>John Doe</h2>
-                <p className='text-gray-500'>+61 5221 5521 55</p>
-                <p className='text-gray-500'>john.doe@gmail.com</p>
+                <h2 className='text-xl sm:text-2xl font-semibold'>{userInfo?.name}</h2>
+                {/* <p className='text-gray-500'>+61 5221 5521 55</p> */}
+                <p className='text-gray-500'>{userInfo?.email}</p>
               </div>
             </div>
 
@@ -139,13 +156,7 @@ const ProfileView = () => {
 
       {isModalOpen && (
         <AccountModal
-          initialData={{
-            firstName: "John",
-            lastName: "Doe",
-            company: "Gladiator Ltd.",
-            email: "john.doe@gmail.com",
-            contact: "+61 975 157 8462"
-          }}
+         
           isOpen={isModalOpen}
           setIsOpen={setIsModalOpen}
           onSave={handleSaveProfile}

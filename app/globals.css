@@ -231,3 +231,8 @@ main {
 
 
 /* Customize the scrollbar */
+
+input[type="file"] {
+  padding-top: 6px;
+  padding-right: 5.7rem !important;
+}

@@ -13,26 +13,28 @@ import { DataTable } from "@/components/common/data-table"
 // import { Checkbox } from "@/components/ui/checkbox"
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
-import { MessageSquare, MessageSquareDot, MessagesSquare, Loader2,
-    Mail,
-    Globe,
-    PhoneCall,
-    User,
-    CalendarClock,
-    MessageCircle,
-    TrendingUp, 
-    Users,
-    PhoneOutgoing,
-    PhoneMissed,
-    Timer,
-  
-    UserCheck,
-    Volume2,
-    Phone,
-    EyeIcon,
-    PhoneIncoming,
- 
-    Clock, } from "lucide-react"
+import {
+  MessageSquare, MessageSquareDot, MessagesSquare, Loader2,
+  Mail,
+  Globe,
+  PhoneCall,
+  User,
+  CalendarClock,
+  MessageCircle,
+  TrendingUp,
+  Users,
+  PhoneOutgoing,
+  PhoneMissed,
+  Timer,
+
+  UserCheck,
+  Volume2,
+  Phone,
+  EyeIcon,
+  PhoneIncoming,
+
+  Clock,
+} from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -40,687 +42,519 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useRouter, useSearchParams } from "next/navigation"
+import henceforthApi from "@/utils/henceforthApi"
+import dayjs from "dayjs"
+import { Skeleton } from "@/components/ui/skeleton"
 type Message = {
-    id: number;
-    content: string;
-    sender: 'user' | 'agent';
-    timestamp: string;
-  };
-  
-  type RecordType = {
-    id: number;
-    type: 'call' | 'chat';
-    srNo: string;
-    phoneNo?: string;
-    dateTime: string;
-    status: string;
-    transcript?: Message[];
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    country?: string;
-    chatContent?: Message[];
-    duration?: string;
-    callType?: 'incoming' | 'outgoing';
-    department?: string;
-    agentName?: string;
-    callStatus?: 'completed' | 'missed' | 'ongoing';
-  };
-  
-  const ChatMessage = ({ message }: { message: Message }) => (
-    <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`flex items-start max-w-[70%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={message.sender === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
-          <AvatarFallback>{message.sender === 'user' ? 'U' : 'A'}</AvatarFallback>
-        </Avatar>
-        <div className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}>
-          <div className={`rounded-lg p-3 ${
-            message.sender === 'user' 
-              ? 'bg-primary text-primary-foreground' 
-              : 'bg-muted'
-          }`}>
-            {message.content}
-          </div>
-          <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {message.timestamp}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-  
-  const TranscriptMessage = ({ message }: { message: Message }) => ( 
-    <div className='mb-2'>
+  id: number;
+  content: string;
+  sender: 'user' | 'agent';
+  timestamp: string;
+};
+
+type RecordType = {
+  id: number;
+  type: 'call' | 'chat';
+  srNo: string;
+  phoneNo?: string;
+  dateTime: string;
+  status: string;
+  transcript?: Message[];
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  country?: string;
+  chatContent?: Message[];
+  duration?: string;
+  callType?: 'incoming' | 'outgoing';
+  department?: string;
+  agentName?: string;
+  callStatus?: 'completed' | 'missed' | 'ongoing';
+};
+
+
+
+const TranscriptMessage = ({ message }: { message: any }) => (
+
+  <div className='mb-2'>
     <div className="flex items-center gap-2 mb-1">
       <Badge variant="secondary">
-        {message?.sender=="agent" ? "John Doe" : "Sarah Smith"}
+        {message?.role == "model" ? "AI" : "User"}
       </Badge>
       <span className="text-sm text-muted-foreground">
-        {`00:${(1 + 2) * 15}`}
+        {/* {`00:${(1 + 2) * 15}`} */}
       </span>
     </div>
     <p className="text-gray-600 pl-4">
-    {message.content}
+      {message.text}
     </p>
   </div>
-   )
-  const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord: RecordType | null }) => {
-    if (!selectedRecord) return null;
-    
-    return (
-      <div className="space-y-6">
-       {isLoading ? (
-                <div className="flex min-h-screen items-center justify-center h-full">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
-              ) : selectedRecord && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg mt-4 font-semibold flex items-center gap-2">
-                      {selectedRecord.type === 'call' ? (
-                        <>
-                          <PhoneCall className="h-5 w-5" />
-                          Call Details
-                        </>
-                      ) : (
-                        <>
-                          <MessageCircle className="h-5 w-5" />
-                          Chat Details
-                        </>
-                      )}
-                    </h3>
-                    {/* <Badge variant={selectedRecord.type === 'call' ? 'default' : 'secondary'}>
+)
+const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord:any }) => {
+  if (!selectedRecord) return null;
+  const [transcript, setTranscript] = React.useState<any[]>([]);
+  const getTranscription = async() => {
+    try {
+      const apiRes =await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
+      setTranscript(apiRes?.data);
+    } catch (error) {
+      
+    }
+  }
+  getTranscription()
+  
+  return (
+    <div className="space-y-6">
+      {isLoading ? (
+        <div className="flex min-h-screen items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : selectedRecord && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg mt-4 font-semibold flex items-center gap-2">
+            
+                <>
+                  <PhoneCall className="h-5 w-5" />
+                  Call Details
+                </>
+      
+             
+            </h3>
+            {/* <Badge variant={selectedRecord.type === 'call' ? 'default' : 'secondary'}>
                       {selectedRecord.type.toUpperCase()}
                     </Badge> */}
-                  </div>
-                  
-                  <Separator />
-                  
-                  {selectedRecord.type === 'call' ? (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Phone Number</p>
-                                <p className="font-medium">{selectedRecord.phoneNo}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Agent</p>
-                                <p className="font-medium">{selectedRecord.agentName}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Duration</p>
-                                <p className="font-medium">{selectedRecord.duration}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              {selectedRecord.callType === 'incoming' ? (
-                                <PhoneIncoming className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <PhoneOutgoing className="h-4 w-4 text-muted-foreground" />
-                              )}
-                              <div>
-                                <p className="text-sm text-muted-foreground">Call Type</p>
-                                <p className="font-medium capitalize">{selectedRecord.callType}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <h4 className="font-medium mb-2 flex items-center gap-2">
-                          <Volume2 className="h-4 w-4" />
-                          Call Transcript
-                        </h4>
-                        <ScrollArea className="max-h-[400px] overflow-y-scroll w-full rounded-md border p-4">
-                          <div className="whitespace-pre-line">
-                          {selectedRecord?.transcript?.map((message:any) => (
-                              <TranscriptMessage key={message.id} message={message} />
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Name</p>
-                                <p className="font-medium">{selectedRecord.name}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Email</p>
-                                <p className="font-medium">{selectedRecord.email}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Phone</p>
-                                <p className="font-medium">{selectedRecord.phoneNumber}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <Globe className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Country</p>
-                                <p className="font-medium">{selectedRecord.country}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-  
+          </div>
+
+          <Separator />
+
+          
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+              
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <h4 className="font-medium mb-2 flex items-center gap-2">
-                          <MessageSquare className="h-4 w-4" />
-                          Chat History
-                        </h4>
-                        <ScrollArea className="max-h-[450px] overflow-y-scroll w-full rounded-md border p-4 bg-background">
-                          <div className="space-y-4">
-                            {selectedRecord.chatContent?.map((message:any) => (
-                              <ChatMessage key={message.id} message={message} />
-                            ))}
-                          </div>
-                        </ScrollArea>
+                        <p className="text-sm text-muted-foreground">Agent</p>
+                        <p className="font-medium">{selectedRecord.agentName}</p>
                       </div>
                     </div>
-                  )}
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Duration</p>
+                        <p className="font-medium">{selectedRecord?.call_duration+"s"}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                  
+                        <PhoneIncoming className="h-4 w-4 text-muted-foreground" />
+                      
+     
+                      
+                      <div>
+                        <p className="text-sm text-muted-foreground">Call Type</p>
+                        <p className="font-medium capitalize">{"Incoming"}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                  <div className="mx-auto w-full flex justify-center">
-                    <Link href={selectedRecord.type==="call"?"/call-management/3425/view":"/chat/342/view"}>
-                      <Button className="common-btn text-white">
-                        View Details
-                      </Button>
-                    </Link>
+              <div className="mb-3">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Volume2 className="h-4 w-4" />
+                  Call Transcript
+                </h4>
+                <ScrollArea className="max-h-[400px] overflow-y-scroll w-full rounded-md border p-4">
+                  <div className="whitespace-pre-line">
+                    {transcript?.map((message: any) => (
+                      <TranscriptMessage key={message?._id} message={message} />
+                    ))}
                   </div>
-                </div>
+                </ScrollArea>
+              </div>
+            </div>
+          
 
-               
-
-              )}
-      </div>
-    );
-  };
-const data: any = [
-    {
-        id: "101",
-        type: 'call',
-        job_title: "Social Media Assistant",
-        phone_no: "87587658768",
-        status: "In Progress",
-        created_at: "2024-10-15T10:20:00Z",
-        result: 85,
-        notes: "Review scheduled for next week",
-        dateAndTime: "15 Oct, 2024, 10:20 AM",
-        transcript:[
-            {
-              id: 1,
-              content: "Hi, I need help with my account settings",
-              sender: 'user',
-              timestamp: '10:30 AM'
-            },
-            {
-              id: 2,
-              content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-              sender: 'agent',
-              timestamp: '10:31 AM'
-            },
-            {
-              id: 3,
-              content: "I can't find where to change my notification preferences",
-              sender: 'user',
-              timestamp: '10:32 AM'
-            },
-            {
-              id: 4,
-              content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-              sender: 'agent',
-              timestamp: '10:33 AM'
-            },
-            {
-              id: 1,
-              content: "Hi, I need help with my account settings",
-              sender: 'user',
-              timestamp: '10:30 AM'
-            },
-            {
-              id: 2,
-              content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-              sender: 'agent',
-              timestamp: '10:31 AM'
-            },
-            {
-              id: 3,
-              content: "I can't find where to change my notification preferences",
-              sender: 'user',
-              timestamp: '10:32 AM'
-            },
-            {
-              id: 4,
-              content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-              sender: 'agent',
-              timestamp: '10:33 AM'
-            }
-          ],
-    },
-    {
-        id: "101",
-        type: 'call',
-        job_title: "Social Media Assistant",
-        phone_no: "87587658768",
-        status: "In Progress",
-        created_at: "2024-10-15T10:20:00Z",
-        result: 85,
-        notes: "Review scheduled for next week",
-        dateAndTime: "15 Oct, 2024, 10:20 AM",
-        transcript:[
-            {
-              id: 1,
-              content: "Hi, I need help with my account settings",
-              sender: 'user',
-              timestamp: '10:30 AM'
-            },
-            {
-              id: 2,
-              content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-              sender: 'agent',
-              timestamp: '10:31 AM'
-            },
-            {
-              id: 3,
-              content: "I can't find where to change my notification preferences",
-              sender: 'user',
-              timestamp: '10:32 AM'
-            },
-            {
-              id: 4,
-              content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-              sender: 'agent',
-              timestamp: '10:33 AM'
-            },
-            {
-              id: 1,
-              content: "Hi, I need help with my account settings",
-              sender: 'user',
-              timestamp: '10:30 AM'
-            },
-            {
-              id: 2,
-              content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-              sender: 'agent',
-              timestamp: '10:31 AM'
-            },
-            {
-              id: 3,
-              content: "I can't find where to change my notification preferences",
-              sender: 'user',
-              timestamp: '10:32 AM'
-            },
-            {
-              id: 4,
-              content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-              sender: 'agent',
-              timestamp: '10:33 AM'
-            }
-          ],
-    },
+          <div className="mx-auto w-full flex justify-center">
+            <Link href={`/call-management/${selectedRecord?._id}/view`}>
+              <Button className="common-btn text-white">
+                View Details
+              </Button>
+            </Link>
+          </div>
+        </div>
 
 
-    {
-        id: "101",
-        type: 'call',
-        job_title: "Social Media Assistant",
-        phone_no: "87587658768",
-        status: "In Progress",
-        created_at: "2024-10-15T10:20:00Z",
-        result: 85,
-        notes: "Review scheduled for next week",
-        dateAndTime: "15 Oct, 2024, 10:20 AM",
-        transcript:[
-            {
-              id: 1,
-              content: "Hi, I need help with my account settings",
-              sender: 'user',
-              timestamp: '10:30 AM'
-            },
-            {
-              id: 2,
-              content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-              sender: 'agent',
-              timestamp: '10:31 AM'
-            },
-            {
-              id: 3,
-              content: "I can't find where to change my notification preferences",
-              sender: 'user',
-              timestamp: '10:32 AM'
-            },
-            {
-              id: 4,
-              content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-              sender: 'agent',
-              timestamp: '10:33 AM'
-            },
-            {
-              id: 1,
-              content: "Hi, I need help with my account settings",
-              sender: 'user',
-              timestamp: '10:30 AM'
-            },
-            {
-              id: 2,
-              content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-              sender: 'agent',
-              timestamp: '10:31 AM'
-            },
-            {
-              id: 3,
-              content: "I can't find where to change my notification preferences",
-              sender: 'user',
-              timestamp: '10:32 AM'
-            },
-            {
-              id: 4,
-              content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-              sender: 'agent',
-              timestamp: '10:33 AM'
-            }
-          ],
-    },
-  
-];
+
+      )}
+    </div>
+  );
+};
+
 
 export type Payment = {
-    id: string
-    srNo: number
-    dateAndTime: string
-    transcript: any
-    status: "Completed" | "In progress" | "success" | "failed"
-    job_title: string
-    created_at: string,
-    result: number,
+  id: string
+  srNo: number
+  dateAndTime: string
+  transcript: any
+  status: "Completed" | "In progress" | "success" | "failed"
+  job_title: string
+  created_at: string,
+  result: number,
 }
 
 
 
 
 function DataTableDemo() {
-    const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-    const [activeTab, setActiveTab] = React.useState("all")
+  const [isLoading, setIsLoading] = React.useState<boolean>(false)
+  const router = useRouter();
+  const searchParams = useSearchParams()
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [activeTab, setActiveTab] = React.useState("ALL");
+  const [callState, setCallState] = React.useState<any>({
+    data:[],
+    count:0
+  });
 
-    // Filter data based on active tab
-    const filteredData = React.useMemo(() => {
-        return data.filter((item: any) => {
-            if (activeTab === "active") {
-                return item.status === "In Progress"
-            }
-            return item.status === "Completed"
-        })
-    }, [activeTab])
+  const initData = async () => {
+    setIsLoading(true);
+    try {
+      let urlSearchParam = new URLSearchParams();
 
-    //columns defined here only
-    const columns:any= [
-        {
-            accessorKey: "srNo",
-            header: "Sr. No.",
-            cell: ({ row }: { row: { index: number } }) => <div className="text-blue-500">{row.index + 1}</div>,
-        },
-        {
-            header:"Call ID",
-            cell: ({ row }: { row:any }) => (
-                <p className="flex items-center text-blue-500 gap-2">
-                
-                  #123456
-                  
-                </p>
-              
-            )
-        },
-        {
-            accessorKey: "phone_no",
-            header: "Phone No.",
-            cell: ({ getValue }: { getValue: () => unknown }) => (
-                <div>{getValue() as string}</div>
-            ),
-        },
-        {
-            accessorKey: "dateAndTime",
-            header: "Date and Time",
-            cell: ({ row }: { row: { original: { dateAndTime: string } } }) => (
-                <div className="">
-                    {row.original.dateAndTime}
-                </div>
-            ),
-        },
-        {
-            accessorKey: "transcript",
-            header: "Transcript",
-            cell: ({ row }:  { row: { index: number; original: RecordType } }) => {
-             
-                  return (
-                    <div>
-                      <p className="font-medium">
-                        {row.original.transcript && row.original.transcript[0] 
-                          ? row.original.transcript[0].content.length > 30 
-                            ? row.original.transcript[0].content.slice(0, 30) + "..." 
-                            : row.original.transcript[0].content 
-                          : "N/A"}
-                      </p>
-                    </div>
-                  );
-                }
-                
-        },
-        // {
-        //     accessorKey: "status",
-        //     header: "Status",
-        //     cell: ({ getValue }) => {
-        //         const status = getValue() as string
-        //         return (
-        //             <div className="flex items-center">
-        //                 <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-        //                     {status}
-        //                 </span>
+      if (searchParams.get('pagination')) {
+        urlSearchParam.set("pagination", String(Number(searchParams.get('pagination')) - 1));
+      }else{
+        urlSearchParam.set("pagination", String(0));
+      }
+      if (searchParams.get('search')) {
+        urlSearchParam.set("search", String(searchParams.get('search')));
+        urlSearchParam.set("pagination", String(Number(0)));
+      }
+      if (activeTab) {
+         if(activeTab!="ALL"){
+
+           urlSearchParam.set("status",activeTab.toString());
+         }
+        } 
+      
+      if (searchParams.get('limit')) {
+        urlSearchParam.set("limit", String(10));
+      }else{
+
+        urlSearchParam.set("limit", String(searchParams.get('limit') ?? 10));
+      }
+      urlSearchParam.set("type", "CALL");
 
 
-        {
-            id: "actions",
-            header: "Action",
-            cell: ({ row }: { row: { index: number; original: RecordType } })=>{
-                const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-                const [isLoading, setIsLoading] = React.useState(false);
-                const [selectedRecord, setSelectedRecord] = React.useState(null);
-                
-                const handleViewRecord = async (record:any) => {
-                  setSelectedRecord(record);
-                  setIsLoading(true);
-                  // Keep the sheet open while loading
-                  setIsSheetOpen(true);
-                  
-                  // Simulate API call
-                  await new Promise(resolve => setTimeout(resolve, 1000));
-                  setIsLoading(false);
-                };
-              
-                return (
-                  <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                    <SheetTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleViewRecord(row.original)}
-                      >
-                        <EyeIcon color='gray'/>
-                      </Button>
-                    </SheetTrigger>
-                    
-                    <SheetContent
-                      className="w-[100%] sm:w-[70%] md:w-[60%] lg:w-[50%] xl:w-[40%] 
+      let apiRes = await henceforthApi.SuperAdmin.callListing(
+        urlSearchParam.toString()
+      )
+      setCallState(apiRes);
+
+    } catch (error) {
+      console.error(error);
+    }
+    finally{
+      setIsLoading(false);
+    }
+  }
+
+  React.useEffect(() => {
+    initData();
+  }, [searchParams.toString(), activeTab])
+
+  React.useEffect(() => {
+    console.log('Call State:', callState);
+    console.log('Data Length:', callState?.data?.length);
+  }, [callState]);
+
+  const columns: any = [
+    {
+
+      header: "Sr. No.",
+      cell: ({ row }: { row: { index: number } }) => <div className="text-blue-500">{row.index + 1}</div>,
+    },
+    {
+      header: "Call ID",
+      cell: ({ row }: { row: any }) => (
+        <p className="flex items-center text-blue-500 gap-2">
+
+          {row.original.call_id.length > 20 ? row.original.call_id.slice(0, 20) : row.original.call_id}
+
+        </p>
+
+      )
+    },
+    {
+      accessorKey: "Call Duration",
+      header: "Call Duration",
+      cell: ({ row }: { row: { original: { call_duration: number } } }) => (
+        <div className="">
+          {row.original.call_duration+"s"}
+        </div>
+      ),
+    },
+
+    {
+
+      header: "Date and Time",
+      cell: ({ row }: { row:any }) => (
+        <div className="">
+          {dayjs(row.original.created_at).format("DD-MM-YYYY")}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "transcript",
+      header: "Transcript",
+      cell: ({ row }: { row: any  }) => {
+
+        return (
+          <div>
+            <p className="font-medium">
+              {row.original?.summary?.length > 20 ? row.original?.summary?.slice(0, 20) : row.original?.summary}
+            </p>
+          </div>
+        );
+      }
+
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: { row: any }) => {
+
+        return (
+          <div className="flex items-center">
+            <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              {row.original.status}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Action",
+      cell: ({ row }: { row: { index: number; original: RecordType } }) => {
+        const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+        const [isLoading, setIsLoading] = React.useState(false);
+        const [selectedRecord, setSelectedRecord] = React.useState(null);
+
+        const handleViewRecord = async (record: any) => {
+          setSelectedRecord(record);
+          setIsLoading(true);
+          // Keep the sheet open while loading
+          setIsSheetOpen(true);
+
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          setIsLoading(false);
+        };
+
+        return (
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                onClick={() => handleViewRecord(row.original)}
+              >
+                <EyeIcon color='gray' />
+              </Button>
+            </SheetTrigger>
+
+            <SheetContent
+              className="w-[100%] sm:w-[70%] md:w-[60%] lg:w-[50%] xl:w-[40%] 
                       max-w-[100%] sm:max-w-[80%] md:max-w-[70%] lg:max-w-[70%] xl:max-w-[50%]
                       max-h-screen overflow-y-auto"
-                      side="right"
-                    >
-                      <SheetContentComponent 
-                        isLoading={isLoading }
-                        selectedRecord={selectedRecord }
-                      />
-                    </SheetContent>
-                  </Sheet>
-                );
-              },
-        }
-    ]
+              side="right"
+            >
+              <SheetContentComponent
+                isLoading={isLoading}
+                selectedRecord={selectedRecord}
+              />
+            </SheetContent>
+          </Sheet>
+        );
+      },
+    }
+  ]
 
-    return (
-        <PageContainer>
-            <div className="container mx-auto px-6 py-2">
-                <div>
-                    <p className="heading mb-3">Call Management</p>
-                </div>
+  const skeletonColumns = columns.map((column:any) => ({
+    ...column,
+    cell: () => <Skeleton className="h-8 w-full" />
+  }));
 
-                <Tabs defaultValue="active" className="w-full mb-6" onValueChange={setActiveTab}>
-                    <TabsList className="grid grid-cols-3 h-12 p-1 bg-gray-100 rounded-full shadow-inner">
-                    <TabsTrigger
-                            className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "all"
-                                    ? "bg-primary text-white shadow-md"
-                                    : "text-gray-500 hover:bg-gray-200"
-                                }`}
-                            value="all"
-                        >
-                            <span className={`${activeTab === "all"
-                                    ? " text-blue-600 "
-                                    : "text-gray-500 hover:bg-gray-200"
-                                }`}> All Calls</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "active"
-                                    ? "bg-primary text-white shadow-md"
-                                    : "text-gray-500 hover:bg-gray-200"
-                                }`}
-                            value="active"
-                        >
-                            <span className={`${activeTab === "active"
-                                    ? " text-blue-600 "
-                                    : "text-gray-500 hover:bg-gray-200"
-                                }`}> Active Calls</span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "previous"
-                                    ? "bg-primary text-white shadow-md"
-                                    : "text-gray-500 hover:bg-gray-200"
-                                }`}
-                            value="previous"
-                        >
-                            <span className={`${activeTab === "previous"
-                                    ? " text-blue-600 "
-                                    : "text-gray-500 hover:bg-gray-200"
-                                }`}> Previous Calls</span>
-                        </TabsTrigger>
-                    </TabsList>
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-16 w-16 mb-4 text-gray-300" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+        />
+      </svg>
+      <h3 className="text-lg font-semibold mb-2">No Records Found</h3>
+      <p className="text-sm text-center">There are no calls available for the selected filter.</p>
+    </div>
+  );
+  return (
+    <PageContainer>
+      <div className="container mx-auto px-6 py-2">
+        <div>
+          <p className="heading mb-3">Call Management</p>
+        </div>
 
-                    <TabsContent value="all" className="mt-4">
-                        <div className="flex justify-between items-center py-4">
-                            <Input
-                                placeholder="Search and filter"
-                                className="max-w-sm"
-                                type="search"
-                            />
-                        </div>
-                        <div className="mx-auto">
-                            <DataTable
-                                columns={columns}
-                                data={filteredData}
-                                totalItems={40}
-                            />
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="active" className="mt-4">
-                        <div className="flex justify-between items-center py-4">
-                            <Input
-                                placeholder="Search and filter"
-                                className="max-w-sm"
-                                type="search"
-                            />
-                        </div>
-                        <div className="mx-auto">
-                            <DataTable
-                                columns={columns}
-                                data={filteredData}
-                                totalItems={40}
-                            />
-                        </div>
-                    </TabsContent>
+        <Tabs defaultValue="ALL" className="w-full mb-6" onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-3 h-12 p-1 bg-gray-100 rounded-full shadow-inner">
+            <TabsTrigger
+              className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "ALL"
+                ? "bg-primary text-white shadow-md"
+                : "text-gray-500 hover:bg-gray-200"
+                }`}
+              value="ALL"
+            >
+              <span className={`${activeTab === "ALL"
+                ? " text-blue-600 "
+                : "text-gray-500 hover:bg-gray-200"
+                }`}> All Calls</span>
+            </TabsTrigger>
+            <TabsTrigger
+              className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "ACTIVE"
+                ? "bg-primary text-white shadow-md"
+                : "text-gray-500 hover:bg-gray-200"
+                }`}
+              value="ACTIVE"
+            >
+              <span className={`${activeTab === "ACTIVE"
+                ? " text-blue-600 "
+                : "text-gray-500 hover:bg-gray-200"
+                }`}> Active Calls</span>
+            </TabsTrigger>
+            <TabsTrigger
+              className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "COMPLETE"
+                ? "bg-primary text-white shadow-md"
+                : "text-gray-500 hover:bg-gray-200"
+                }`}
+              value="COMPLETE"
+            >
+              <span className={`${activeTab === "COMPLETE"
+                ? " text-blue-600 "
+                : "text-gray-500 hover:bg-gray-200"
+                }`}> Previous Calls</span>
+            </TabsTrigger>
+          </TabsList>
 
-                    <TabsContent value="previous" className="mt-4">
-                        <div className="flex justify-between items-center py-4">
-                            <Input
-                                placeholder="Search and filter"
-                                className="max-w-sm"
-                                type="search"
-                            />
-                        </div>
-                        <div className="mx-auto">
-                            <DataTable
-                                columns={columns}
-                                data={filteredData}
-                                totalItems={40}
-                            />
-                        </div>
-                    </TabsContent>
-                </Tabs>
+          <TabsContent value="ALL" className="mt-4">
+            <div className="flex justify-between items-center py-4">
+              <Input
+                placeholder="Search and filter"
+                className="max-w-sm"
+                type="search"
+              />
             </div>
-        </PageContainer>
-    )
+            <div className="mx-auto">
+            {isLoading ? (
+                <DataTable
+                  columns={skeletonColumns}
+                  data={Array(5).fill({})}
+                  totalItems={0}
+                />
+              ) : callState?.data?.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={callState?.data}
+                  totalItems={callState?.count}
+                />
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="ACTIVE" className="mt-4">
+            <div className="flex justify-between items-center py-4">
+              <Input
+                placeholder="Search and filter"
+                className="max-w-sm"
+                type="search"
+              />
+            </div>
+            <div className="mx-auto">
+            {isLoading ? (
+                <DataTable
+                  columns={skeletonColumns}
+                  data={Array(5).fill({})}
+                  totalItems={0}
+                />
+              ) : callState?.data?.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={callState?.data}
+                  totalItems={callState?.count}
+                />
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="COMPLETE" className="mt-4">
+            <div className="flex justify-between items-center py-4">
+              <Input
+                placeholder="Search and filter"
+                className="max-w-sm"
+                type="search"
+              />
+            </div>
+            <div className="mx-auto">
+            {isLoading ? (
+                <DataTable
+                  columns={skeletonColumns}
+                  data={Array(5).fill({})}
+                  totalItems={0}
+                />
+              ) : callState?.data?.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={callState?.data}
+                  totalItems={callState?.count}
+                />
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </PageContainer>
+  )
 }
 
 export default function DashboardPage() {
-    return (
-        <DashboardLayout>
-            <DataTableDemo />
-        </DashboardLayout>
-    )
+  return (
+    <DashboardLayout>
+      <DataTableDemo />
+    </DashboardLayout>
+  )
 }

@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HelpCircle, Eye, EyeOff, Check, AlertCircle, KeySquare } from "lucide-react";
 import { Icons } from "@/components/icons";
+import toast from 'react-hot-toast';
+import henceforthApi from '@/utils/henceforthApi';
 
 const PasswordChangeDialog = () => {
   const [open, setOpen] = useState(false);
@@ -22,40 +24,65 @@ const PasswordChangeDialog = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e:any) => {
+  const handleSubmit = async(e:any) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
 
     // Basic validation
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      setError('All fields are required');
-      return;
+    // if (!oldPassword || !newPassword || !confirmPassword) {
+    //   setError('All fields are required');
+    //   return;
+    // }
+
+    // if (newPassword !== confirmPassword) {
+    //   setError('New passwords do not match');
+    //   return;
+    // }
+
+    // if (newPassword.length < 8) {
+    //   setError('New password must be at least 8 characters long');
+    //   return;
+    // }
+
+    const payload = {
+      oldPassword,
+      newPassword,
+      confirmPassword
     }
 
-    if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters long');
-      return;
-    }
+    try {
+      const apires = await henceforthApi.SuperAdmin.changePassword(payload);
+      toast.success("Password Changed Successfully");
+    } catch (error: any) {
+      if (error?.response) {
+        toast.error(error?.response?.body?.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+   }finally{
+    setSuccess(true);
+    setOldPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setOpen(false);
+    setSuccess(false);
+    setVisibility({ old: false, new: false, confirm: false });
+  }
 
     // Simulate API call
-    setTimeout(() => {
-      setSuccess(true);
-      // Reset form
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      // Close dialog after 1.5s
-      setTimeout(() => {
-        setOpen(false);
-        setSuccess(false);
-      },800);
-    }, 1000);
+    // setTimeout(() => {
+    //   setSuccess(true);
+    //   // Reset form
+    //   setOldPassword('');
+    //   setNewPassword('');
+    //   setConfirmPassword('');
+    //   // Close dialog after 1.5s
+    //   setTimeout(() => {
+    //     setOpen(false);
+    //     setSuccess(false);
+    //   },800);
+    // }, 1000);
   };
 
   const toggleVisibility = (field: 'old' | 'new' | 'confirm') => {
