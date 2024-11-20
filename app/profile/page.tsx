@@ -41,7 +41,9 @@ const ProfileView = () => {
     }
     try {
      const apiRes=await henceforthApi.SuperAdmin.updateProfile(data);
-     toast.success("Profile Updated Successfully");
+     toast.success("Profile Updated Successfully",{
+      style:{fontSize:'14px', background:"#BBBBBB"}
+     });
      getProfile()
     } catch (error) {
       

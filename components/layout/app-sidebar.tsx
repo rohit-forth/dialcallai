@@ -81,7 +81,10 @@ export default function AppSidebar({
   
 
 
-  const signOut = () => {}
+  const signOut = () => {
+
+    router.replace("/")
+  }
   if (!mounted) {
     return null; // or a loading skeleton
   }
@@ -202,7 +205,7 @@ export default function AppSidebar({
                           submitText="Yes, logout" 
                           title="Confirm Logout" 
                           des="Are you sure you want to logout from your account?" 
-                          onConfirm={() => signOut()}
+                       
                         />
                         </AlertDialog>}
             </SidebarMenu>
@@ -262,7 +265,7 @@ export default function AppSidebar({
                         submitText="Yes, log me out"
                         title="Confirm Logout"
                         des="Are you sure you want to logout?"
-                        onConfirm={() => signOut()}
+                      
                       />
                     </AlertDialog>
                   </DropdownMenuItem>

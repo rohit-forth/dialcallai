@@ -35,8 +35,12 @@ import {
   ColumnDef,
 } from '@tanstack/react-table';
 import { DataTable } from '@/components/common/data-table';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import henceforthApi from '@/utils/henceforthApi';
+import { Skeleton } from '@/components/ui/skeleton';
+import { table } from 'console';
+import dayjs from 'dayjs';
 type Message = {
   id: number;
   content: string;
@@ -64,46 +68,59 @@ type RecordType = {
   callStatus?: 'completed' | 'missed' | 'ongoing';
 };
 
-const ChatMessage = ({ message }: { message: Message }) => (
-  <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-    <div className={`flex items-start max-w-[70%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
+const ChatMessage = ({ message }: { message: any }) => (
+  <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`flex items-start max-w-[70%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
       <Avatar className="w-8 h-8">
-        <AvatarImage src={message.sender === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
-        <AvatarFallback>{message.sender === 'user' ? 'U' : 'A'}</AvatarFallback>
+        <AvatarImage src={message.role === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
+        <AvatarFallback>{message.role === 'user' ? 'U' : 'A'}</AvatarFallback>
       </Avatar>
-      <div className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}>
-        <div className={`rounded-lg p-3 ${message.sender === 'user'
-            ? 'bg-primary text-primary-foreground'
+      <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+        <div className={`rounded-lg p-3 ${
+          message.role === 'user' 
+            ? 'bg-primary text-primary-foreground' 
             : 'bg-muted'
-          }`}>
-          {message.content}
+        }`}>
+          {message.text}
         </div>
-        <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+        {/* <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
           <Clock className="w-3 h-3" />
           {message.timestamp}
-        </span>
+        </span> */}
       </div>
     </div>
   </div>
 );
 
-const TranscriptMessage = ({ message }: { message: Message }) => (
+const TranscriptMessage = ({ message }: { message: any }) => (
+
   <div className='mb-2'>
     <div className="flex items-center gap-2 mb-1">
       <Badge variant="secondary">
-        {message?.sender == "agent" ? "John Doe" : "Sarah Smith"}
+        {message?.role == "model" ? "AI" : "User"}
       </Badge>
       <span className="text-sm text-muted-foreground">
-        {`00:${(1 + 2) * 15}`}
+        {/* {`00:${(1 + 2) * 15}`} */}
       </span>
     </div>
     <p className="text-gray-600 pl-4">
-      {message.content}
+      {message.text}
     </p>
   </div>
 )
-const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord: RecordType | null }) => {
+const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord: any }) => {
   if (!selectedRecord) return null;
+
+  const [sheetContent, setSheetContent] = React.useState<any[]>([]);
+  const getTranscription = async() => {
+    try {
+      const apiRes =await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
+      setSheetContent(apiRes?.data);
+    } catch (error) {
+      
+    }
+  }
+  getTranscription()
 
   return (
     <div className="space-y-6">
@@ -115,7 +132,7 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg mt-4 font-semibold flex items-center gap-2">
-              {selectedRecord.type === 'call' ? (
+              {selectedRecord.type === 'CALL' ? (
                 <>
                   <PhoneCall className="h-5 w-5" />
                   Call Details
@@ -134,7 +151,7 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
 
           <Separator />
 
-          {selectedRecord.type === 'call' ? (
+          {selectedRecord.type === 'CALL' ? (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <Card>
@@ -194,8 +211,8 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
                 </h4>
                 <ScrollArea className="max-h-[400px] overflow-y-scroll w-full rounded-md border p-4">
                   <div className="whitespace-pre-line">
-                    {selectedRecord?.transcript?.map((message: any) => (
-                      <TranscriptMessage key={message.id} message={message} />
+                    {sheetContent?.map((message: any) => (
+                      <TranscriptMessage key={message?._id} message={message} />
                     ))}
                   </div>
                 </ScrollArea>
@@ -257,8 +274,8 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
                 </h4>
                 <ScrollArea className="max-h-[450px] overflow-y-scroll w-full rounded-md border p-4 bg-background">
                   <div className="space-y-4">
-                    {selectedRecord.chatContent?.map((message: any) => (
-                      <ChatMessage key={message.id} message={message} />
+                    {sheetContent?.map((message: any) => (
+                      <ChatMessage key={message?._id} message={message} />
                     ))}
                   </div>
                 </ScrollArea>
@@ -273,224 +290,106 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
 
 const Dashboard = () => {
 
-  //table columns
 
-  // const [selectedRecord, setSelectedRecord] = useState<RecordType | null>(null);
-  const router = useRouter()
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false)
+  const router = useRouter();
+  const searchParams = useSearchParams()
+  // const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
-  const listingData: RecordType[] = [
-    {
-      id: 1,
-      type: 'call',
-      srNo: '001',
-      phoneNo: '+1234567890',
-      dateTime: '2024-02-14 10:30 AM',
-      status: 'completed',
-      transcript: [
-        {
-          id: 1,
-          content: "Hi, I need help with my account settings",
-          sender: 'user',
-          timestamp: '10:30 AM'
-        },
-        {
-          id: 2,
-          content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-          sender: 'agent',
-          timestamp: '10:31 AM'
-        },
-        {
-          id: 3,
-          content: "I can't find where to change my notification preferences",
-          sender: 'user',
-          timestamp: '10:32 AM'
-        },
-        {
-          id: 4,
-          content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-          sender: 'agent',
-          timestamp: '10:33 AM'
-        },
-        {
-          id: 1,
-          content: "Hi, I need help with my account settings",
-          sender: 'user',
-          timestamp: '10:30 AM'
-        },
-        {
-          id: 2,
-          content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-          sender: 'agent',
-          timestamp: '10:31 AM'
-        },
-        {
-          id: 3,
-          content: "I can't find where to change my notification preferences",
-          sender: 'user',
-          timestamp: '10:32 AM'
-        },
-        {
-          id: 4,
-          content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-          sender: 'agent',
-          timestamp: '10:33 AM'
-        }
-      ],
-      duration: '15:23',
-      callType: 'incoming',
-      department: 'Sales',
-      agentName: 'Sarah Johnson',
-      callStatus: 'completed'
-    },
-    {
-      id: 2,
-      type: 'chat',
-      srNo: '002',
-      name: 'John Doe',
-      email: 'john@example.com',
-      phoneNumber: '+1987654321',
-      country: 'USA',
-      department: 'Support',
-      agentName: 'Mike Wilson',
-      dateTime: '2024-02-14 10:30 AM',
-      status: 'completed',
-      chatContent: [
-        {
-          id: 1,
-          content: "Hi, I need help with my account settings",
-          sender: 'user',
-          timestamp: '10:30 AM'
-        },
-        {
-          id: 2,
-          content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-          sender: 'agent',
-          timestamp: '10:31 AM'
-        },
-        {
-          id: 3,
-          content: "I can't find where to change my notification preferences",
-          sender: 'user',
-          timestamp: '10:32 AM'
-        },
-        {
-          id: 4,
-          content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-          sender: 'agent',
-          timestamp: '10:33 AM'
-        }
-      ]
-    }, {
-      id: 2,
-      type: 'chat',
-      srNo: '002',
-      name: 'John Doe',
-      email: 'john@example.com',
-      phoneNumber: '+1987654321',
-      country: 'USA',
-      department: 'Support',
-      agentName: 'Mike Wilson',
-      dateTime: '2024-02-14 10:30 AM',
-      status: 'completed',
-      chatContent: [
-        {
-          id: 1,
-          content: "Hi, I need help with my account settings",
-          sender: 'user',
-          timestamp: '10:30 AM'
-        },
-        {
-          id: 2,
-          content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-          sender: 'agent',
-          timestamp: '10:31 AM'
-        },
-        {
-          id: 3,
-          content: "I can't find where to change my notification preferences",
-          sender: 'user',
-          timestamp: '10:32 AM'
-        },
-        {
-          id: 4,
-          content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-          sender: 'agent',
-          timestamp: '10:33 AM'
-        }
-      ]
-    }, {
-      id: 2,
-      type: 'chat',
-      srNo: '002',
-      name: 'John Doe',
-      email: 'john@example.com',
-      phoneNumber: '+1987654321',
-      country: 'USA',
-      department: 'Support',
-      agentName: 'Mike Wilson',
-      dateTime: '2024-02-14 10:30 AM',
-      status: 'completed',
-      chatContent: [
-        {
-          id: 1,
-          content: "Hi, I need help with my account settings",
-          sender: 'user',
-          timestamp: '10:30 AM'
-        },
-        {
-          id: 2,
-          content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-          sender: 'agent',
-          timestamp: '10:31 AM'
-        },
-        {
-          id: 3,
-          content: "I can't find where to change my notification preferences",
-          sender: 'user',
-          timestamp: '10:32 AM'
-        },
-        {
-          id: 4,
-          content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-          sender: 'agent',
-          timestamp: '10:33 AM'
-        }
-      ]
+  const [tableData, setTableData] = React.useState<any>({
+    data:[],
+    count:0
+  });
+  const [cardsData, setCardsData] = React.useState<any>({
+    data:{
+      "active_call": 0,
+      "total_call": 0,
+      "total_chat": 0
     }
-  ];
-  const columns: ColumnDef<RecordType>[] = [
+  });
+  
+  const initCards = async () => {
+    try {
+      let apiRes = await henceforthApi.SuperAdmin.dashboardCards();
+      setCardsData(apiRes);
+    } catch (error) {
+      console.error(error);
+    }
+
+  }
+  const initData = async () => {
+    setIsLoading(true);
+    try {
+      let urlSearchParam = new URLSearchParams();
+
+      if (searchParams.get('pagination')) {
+        urlSearchParam.set("pagination", String(Number(searchParams.get('pagination')) - 1));
+      }else{
+        urlSearchParam.set("pagination", String(0));
+      }
+      if (searchParams.get('search')) {
+        urlSearchParam.set("search", String(searchParams.get('search')));
+        urlSearchParam.set("pagination", String(Number(0)));
+      }
+     
+
+      urlSearchParam.set("status","ACTIVE");
+        
+      
+      if (searchParams.get('limit')) {
+        urlSearchParam.set("limit", String(10));
+      }else{
+
+        urlSearchParam.set("limit", String(searchParams.get('limit') ?? 10));
+      }
+      // urlSearchParam.set("type", "");
+
+
+      let apiRes = await henceforthApi.SuperAdmin.callListing(
+        urlSearchParam.toString()
+      )
+      setTableData(apiRes);
+
+    } catch (error) {
+      console.error(error);
+    }
+    finally{
+      setIsLoading(false);
+    }
+  }
+  
+  const columns:any = [
     {
-      accessorKey: 'srNo',
+    
       header: 'Sr. No.',
-      cell: ({ row }) => <div className="text-blue-500">{row.index + 1}</div>,
+      cell: ({ row }:{row:any}) => <div className="text-blue-500">{row.index + 1}</div>,
     },
     {
       accessorKey: 'type',
       header: 'Type',
-      cell: ({ row }) => (
-        row.original?.type === "call" ? <PhoneCall className="h-5 w-5 text-blue-500" /> : <MessagesSquare className="h-5 w-5 text-blue-500" />
+      cell: ({ row }:{row:any}) => (
+        row.original?.type === "CALL" ? <PhoneCall className="h-5 w-5 text-blue-500" /> : <MessagesSquare className="h-5 w-5 text-blue-500" />
       ),
     },
     {
-      accessorKey: 'phoneNo',
+      accessorKey: 'phone_no',
       header: 'Phone/Name',
-      cell: ({ row }) => (row.original.type === 'call' ? row.original.phoneNo : row.original.name),
+      cell: ({ row }:{row:any}) => (row.original.type === 'call' ? row.original.phoneNo : row.original.name),
     },
 
     {
       accessorKey: 'dateTime',
       header: 'Date and Time',
+      cell: ({ row }:{row:any}) => (dayjs(row.original.created_at).format("DD MMM YYYY")),
     },
     {
       accessorKey: 'description',
       header: 'Description',
-      cell: ({ row }) => {
+      cell: ({ row }:{row:any}) => {
         if (row.original.type === 'call') {
           return (
             <div>
-              <p className="font-medium">
+              <p className="font-normal">
                 {row.original.transcript && row.original.transcript[0]
                   ? row.original.transcript[0].content.length > 30
                     ? row.original.transcript[0].content.slice(0, 30) + "..."
@@ -502,7 +401,7 @@ const Dashboard = () => {
         }
         return (
           <div>
-            <p className="font-medium">{row.original.transcript && row.original.transcript[0]
+            <p className="font-normal">{row.original.transcript && row.original.transcript[0]
               ? row.original.transcript[0].content.length > 30
                 ? row.original.transcript[0].content.slice(0, 30) + "..."
                 : row.original.transcript[0].content
@@ -512,9 +411,21 @@ const Dashboard = () => {
       },
     },
     {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: { row: any }) => {
+
+        return (
+          <Badge className={`rounded-xl text-white font-medium ${row.original.status === "ACTIVE" ? "bg-blue-400" : "bg-green-500"}`}>
+                {row.original.status === "ACTIVE" ? "Active" : "Completed"}
+           </Badge>
+        );
+      },
+    },
+    {
       accessorKey: 'action',
       header: 'Action',
-      cell: ({ row }) => {
+      cell: ({ row }:{row:any}) => {
         const [isSheetOpen, setIsSheetOpen] = useState(false);
         const [isLoading, setIsLoading] = useState(false);
         const [selectedRecord, setSelectedRecord] = useState(null);
@@ -557,33 +468,40 @@ const Dashboard = () => {
       },
     },
   ];
+  const skeletonColumns = columns.map((column:any) => ({
+    ...column,
+    cell: () => <Skeleton className="h-8 w-full" />
+  }));
 
-  const cardData = {
-    activeCalls: {
-      count: 5,
-      avgDuration: '4:25',
-      inQueue: 3,
-      trend: '+12%',
-      agentsAvailable: 8,
-      longestWait: '2:30'
-    },
-    totalCalls: {
-      count: 150,
-      incoming: 95,
-      outgoing: 45,
-      missed: 10,
-      avgHandleTime: '5:30',
-      satisfaction: '94%'
-    },
-    totalChats: {
-      count: 75,
-      active: 12,
-      avgResponse: '45s',
-      resolved: 58,
-      satisfaction: '96%',
-      waitingCustomers: 5
-    }
-  };
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-16 w-16 mb-4 text-gray-300" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+        />
+      </svg>
+      <h3 className="text-lg font-semibold mb-2">No Records Found</h3>
+      <p className="text-sm text-center">There are no calls available for the selected filter.</p>
+    </div>
+  );
+
+  React.useEffect(() => {
+    initCards()
+    initData();
+  }, [searchParams.toString()])
+
+
+  
+
 
   // const handleViewRecord = async (record: RecordType) => {
   //   setIsLoading(true);
@@ -616,7 +534,7 @@ const Dashboard = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="text-3xl font-bold group-hover:text-blue-700 transition-colors duration-300">
-                    {cardData.activeCalls.count}
+                    {cardsData.data.active_call}
                   </div>
                   {/* <div className="flex items-center text-sm text-muted-foreground gap-1">
                     <TrendingUp className="h-4 w-4 text-green-500" />
@@ -749,7 +667,7 @@ const Dashboard = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="text-3xl font-bold group-hover:text-green-700 transition-colors duration-300 -mt-6">
-                    {cardData.totalCalls.count}
+                    {cardsData?.data?.total_call}
                   </div>
                 </div>
               </div>
@@ -770,7 +688,7 @@ const Dashboard = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="text-3xl font-bold group-hover:text-purple-700 transition-colors duration-300">
-                    {cardData.totalChats.count}
+                    {cardsData?.data.total_chat}
                   </div>
                   {/* <div className="flex items-center text-sm text-muted-foreground gap-1">
                     <MessagesSquare className="h-4 w-4" />
@@ -817,12 +735,21 @@ const Dashboard = () => {
         {/*Data Table */}
 
 
-        <DataTable
-          columns={columns}
-          data={listingData}
-          totalItems={40}
-        />
-
+        {isLoading ? (
+                <DataTable
+                  columns={skeletonColumns}
+                  data={Array(5).fill({})}
+                  totalItems={0}
+                />
+              ) : tableData?.data?.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={tableData?.data}
+                  totalItems={tableData?.count}
+                />
+              )}
 
 
       </div>

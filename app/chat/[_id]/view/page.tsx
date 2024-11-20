@@ -1,4 +1,5 @@
-import React from 'react';
+"use client"
+import React, { useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -14,134 +15,23 @@ import {
   Globe,
   Clock,
   ChevronRight,
-  Menu
+  Menu,
+  Loader
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import DashboardLayout from '@/app/dashboard/layout';
 import PageContainer from '@/components/layout/page-container';
+import henceforthApi from '@/utils/henceforthApi';
+import { useParams } from 'next/navigation';
 
 
-const listingData = [
 
-  {
-    id: 2,
-    type: 'chat',
-    srNo: '002',
-    name: 'John Doe',
-    email: 'john@example.com',
-    phoneNumber: '+1987654321',
-    country: 'USA',
-    department: 'Support',
-    agentName: 'Mike Wilson',
-    dateTime: '2024-02-14 10:30 AM',
-    status: 'completed',
-    chatContent: [
-      {
-        id: 1,
-        content: "Hi, I need help with my account settings",
-        sender: 'user',
-        timestamp: '10:30 AM'
-      },
-      {
-        id: 2,
-        content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-        sender: 'agent',
-        timestamp: '10:31 AM'
-      },
-      {
-        id: 3,
-        content: "I can't find where to change my notification preferences",
-        sender: 'user',
-        timestamp: '10:32 AM'
-      },
-      {
-        id: 4,
-        content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-        sender: 'agent',
-        timestamp: '10:33 AM'
-      }
-    ]
-  },{
-    id: 2,
-    type: 'chat',
-    srNo: '002',
-    name: 'John Doe',
-    email: 'john@example.com',
-    phoneNumber: '+1987654321',
-    country: 'USA',
-    department: 'Support',
-    agentName: 'Mike Wilson',
-    dateTime: '2024-02-14 10:30 AM',
-    status: 'completed',
-    chatContent: [
-      {
-        id: 1,
-        content: "Hi, I need help with my account settings",
-        sender: 'user',
-        timestamp: '10:30 AM'
-      },
-      {
-        id: 2,
-        content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-        sender: 'agent',
-        timestamp: '10:31 AM'
-      },
-      {
-        id: 3,
-        content: "I can't find where to change my notification preferences",
-        sender: 'user',
-        timestamp: '10:32 AM'
-      },
-      {
-        id: 4,
-        content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-        sender: 'agent',
-        timestamp: '10:33 AM'
-      }
-    ]
-  },{
-    id: 2,
-    type: 'chat',
-    srNo: '002',
-    name: 'John Doe',
-    email: 'john@example.com',
-    phoneNumber: '+1987654321',
-    country: 'USA',
-    department: 'Support',
-    agentName: 'Mike Wilson',
-    dateTime: '2024-02-14 10:30 AM',
-    status: 'completed',
-    chatContent: [
-      {
-        id: 1,
-        content: "Hi, I need help with my account settings",
-        sender: 'user',
-        timestamp: '10:30 AM'
-      },
-      {
-        id: 2,
-        content: "Hello! I'd be happy to help you with your account settings. What specific settings are you trying to adjust?",
-        sender: 'agent',
-        timestamp: '10:31 AM'
-      },
-      {
-        id: 3,
-        content: "I can't find where to change my notification preferences",
-        sender: 'user',
-        timestamp: '10:32 AM'
-      },
-      {
-        id: 4,
-        content: "I'll guide you through that process. First, please go to your account dashboard and click on the 'Settings' tab in the top right corner.",
-        sender: 'agent',
-        timestamp: '10:33 AM'
-      }
-    ]
-  }
-];
 const ChatDetailPage = () => {
+  const [chatLoading,setChatloading]=React.useState(false);
+  const [chatHistory, setChatHistory] = React.useState()as any;
+  const params=useParams();
   const chatDetails = {
     name: "Cameron Williamson",
     email: "c.williamson@gmail.com",
@@ -149,6 +39,23 @@ const ChatDetailPage = () => {
     country: "United States",
     avatar: "/placeholder-avatar.jpg",
   };
+
+  const initChatHistory = async () => {
+    setChatloading(true);
+    try {
+      const apiRes=await henceforthApi.SuperAdmin.getTranscription(String(params?._id));
+      setChatHistory(apiRes?.data);
+    } catch (error) {
+      
+    }finally{
+      setChatloading(false);
+    }
+  }
+
+
+  useEffect(() => {
+    initChatHistory();
+  },[]);
 
   const UserDetailsPanel = () => (
     <div className="space-y-6">
@@ -244,25 +151,27 @@ const ChatDetailPage = () => {
           {/* Chat Messages */}
           <ScrollArea className="flex-1 overflow-y-auto"> {/* Modified ScrollArea */}
             <div className="space-y-4 p-4">
-              {Array.isArray(listingData) && listingData[0].chatContent?.map((item, index) => (
-                <div key={index} className={`flex ${item?.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`flex items-start max-w-[70%] ${item.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
+              {chatLoading?<div className="flex min-h-screen  justify-center h-full">
+          <Loader className="h-8 w-8 animate-spin" />
+        </div>:Array.isArray(chatHistory) && chatHistory?.map((item, index) => (
+                <div key={index} className={`flex ${item?.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`flex items-start max-w-[70%] ${item.role === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
                     <Avatar className="w-8 h-8">
-                      <AvatarImage src={item.sender === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
-                      <AvatarFallback>{item.sender === 'user' ? 'U' : 'A'}</AvatarFallback>
+                      <AvatarImage src={item.role === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
+                      <AvatarFallback>{item.role === 'user' ? 'U' : 'A'}</AvatarFallback>
                     </Avatar>
-                    <div className={`flex flex-col ${item.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                    <div className={`flex flex-col ${item.role === 'user' ? 'items-end' : 'items-start'}`}>
                       <div className={`rounded-lg p-3 ${
-                        item.sender === 'user' 
+                        item.role === 'user' 
                           ? 'bg-primary text-primary-foreground' 
                           : 'bg-muted'
                       }`}>
-                        {item?.content}
+                        {item?.text}
                       </div>
-                      <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      {/* <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {item.timestamp}
-                      </span>
+                      </span> */}
                     </div>
                   </div>
                 </div>

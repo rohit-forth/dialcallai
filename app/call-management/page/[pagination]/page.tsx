@@ -277,10 +277,6 @@ function DataTableDemo() {
     initData();
   }, [searchParams.toString(), activeTab])
 
-  React.useEffect(() => {
-    console.log('Call State:', callState);
-    console.log('Data Length:', callState?.data?.length);
-  }, [callState]);
 
   const columns: any = [
     {
@@ -314,19 +310,19 @@ function DataTableDemo() {
       header: "Date and Time",
       cell: ({ row }: { row:any }) => (
         <div className="">
-          {dayjs(row.original.created_at).format("DD-MM-YYYY")}
+          {dayjs(row.original.created_at).format("DD MMM YYYY")}
         </div>
       ),
     },
     {
-      accessorKey: "transcript",
+      accessorKey: "last_message",
       header: "Transcript",
       cell: ({ row }: { row: any  }) => {
 
         return (
           <div>
-            <p className="font-medium">
-              {row.original?.summary?.length > 20 ? row.original?.summary?.slice(0, 20) : row.original?.summary}
+            <p className="font-normal">
+              {row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.last_message?.summary}
             </p>
           </div>
         );
@@ -339,11 +335,9 @@ function DataTableDemo() {
       cell: ({ row }: { row: any }) => {
 
         return (
-          <div className="flex items-center">
-            <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-              {row.original.status}
-            </span>
-          </div>
+          <Badge className={`rounded-xl text-white font-medium ${row.original.status === "ACTIVE" ? "bg-blue-400" : "bg-green-500"}`}>
+                {row.original.status === "ACTIVE" ? "Active" : "Completed"}
+           </Badge>
         );
       },
     },
@@ -436,7 +430,7 @@ function DataTableDemo() {
               value="ALL"
             >
               <span className={`${activeTab === "ALL"
-                ? " text-blue-600 "
+                ? " text-blue-500 "
                 : "text-gray-500 hover:bg-gray-200"
                 }`}> All Calls</span>
             </TabsTrigger>
@@ -448,7 +442,7 @@ function DataTableDemo() {
               value="ACTIVE"
             >
               <span className={`${activeTab === "ACTIVE"
-                ? " text-blue-600 "
+                ? " text-blue-500 "
                 : "text-gray-500 hover:bg-gray-200"
                 }`}> Active Calls</span>
             </TabsTrigger>
@@ -460,20 +454,20 @@ function DataTableDemo() {
               value="COMPLETE"
             >
               <span className={`${activeTab === "COMPLETE"
-                ? " text-blue-600 "
+                ? " text-blue-500 "
                 : "text-gray-500 hover:bg-gray-200"
                 }`}> Previous Calls</span>
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="ALL" className="mt-4">
-            <div className="flex justify-between items-center py-4">
+         { callState?.count>0 && <div className="flex justify-between items-center pt-6">
               <Input
                 placeholder="Search and filter"
                 className="max-w-sm"
                 type="search"
               />
-            </div>
+            </div>}
+          <TabsContent value="ALL" className="mt-4">
+            
             <div className="mx-auto">
             {isLoading ? (
                 <DataTable
@@ -493,13 +487,7 @@ function DataTableDemo() {
             </div>
           </TabsContent>
           <TabsContent value="ACTIVE" className="mt-4">
-            <div className="flex justify-between items-center py-4">
-              <Input
-                placeholder="Search and filter"
-                className="max-w-sm"
-                type="search"
-              />
-            </div>
+            
             <div className="mx-auto">
             {isLoading ? (
                 <DataTable
@@ -520,13 +508,7 @@ function DataTableDemo() {
           </TabsContent>
 
           <TabsContent value="COMPLETE" className="mt-4">
-            <div className="flex justify-between items-center py-4">
-              <Input
-                placeholder="Search and filter"
-                className="max-w-sm"
-                type="search"
-              />
-            </div>
+           
             <div className="mx-auto">
             {isLoading ? (
                 <DataTable

@@ -33,11 +33,14 @@ import { MessageSquare, MessageSquareDot, MessagesSquare, Loader2,
     PhoneIncoming,
  
     Clock, } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import henceforthApi from "@/utils/henceforthApi"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const listingData= [
   
     {
@@ -191,51 +194,46 @@ type Message = {
     callType?: 'incoming' | 'outgoing';
     department?: string;
     agentName?: string;
-    callStatus?: 'completed' | 'missed' | 'ongoing';
+    Chatstatus?: 'completed' | 'missed' | 'ongoing';
   };
   
-  const ChatMessage = ({ message }: { message: Message }) => (
-    <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`flex items-start max-w-[70%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
+  const ChatMessage = ({ message }: { message: any }) => (
+    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`flex items-start max-w-[70%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
         <Avatar className="w-8 h-8">
-          <AvatarImage src={message.sender === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
-          <AvatarFallback>{message.sender === 'user' ? 'U' : 'A'}</AvatarFallback>
+          <AvatarImage src={message.role === 'user' ? '/user-avatar.png' : '/agent-avatar.png'} />
+          <AvatarFallback>{message.role === 'user' ? 'U' : 'A'}</AvatarFallback>
         </Avatar>
-        <div className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}>
+        <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
           <div className={`rounded-lg p-3 ${
-            message.sender === 'user' 
+            message.role === 'user' 
               ? 'bg-primary text-primary-foreground' 
               : 'bg-muted'
           }`}>
-            {message.content}
+            {message.text}
           </div>
-          <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+          {/* <span className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {message.timestamp}
-          </span>
+          </span> */}
         </div>
       </div>
     </div>
   );
   
-  const TranscriptMessage = ({ message }: { message: Message }) => ( 
-    <div className='mb-2'>
-    <div className="flex items-center gap-2 mb-1">
-      <Badge variant="secondary">
-        {message?.sender=="agent" ? "John Doe" : "Sarah Smith"}
-      </Badge>
-      <span className="text-sm text-muted-foreground">
-        {`00:${(1 + 2) * 15}`}
-      </span>
-    </div>
-    <p className="text-gray-600 pl-4">
-    {message.content}
-    </p>
-  </div>
-   )
-  const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord: RecordType | null }) => {
+
+  const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord:any}) => {
     if (!selectedRecord) return null;
-    
+    const [chatHistory, setChatHistory] = React.useState<any[]>([]);
+    const getChatHistory = async() => {
+      try {
+        const apiRes =await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
+        setChatHistory(apiRes?.data);
+      } catch (error) {
+        
+      }
+    }
+    getChatHistory()
     return (
       <div className="space-y-6">
        {isLoading ? (
@@ -246,17 +244,12 @@ type Message = {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg mt-4 font-semibold flex items-center gap-2">
-                      {selectedRecord.type === 'call' ? (
-                        <>
-                          <PhoneCall className="h-5 w-5" />
-                          Call Details
-                        </>
-                      ) : (
-                        <>
+                     
+                       
                           <MessageCircle className="h-5 w-5" />
                           Chat Details
-                        </>
-                      )}
+                       
+                    
                     </h3>
                     {/* <Badge variant={selectedRecord.type === 'call' ? 'default' : 'secondary'}>
                       {selectedRecord.type.toUpperCase()}
@@ -265,74 +258,7 @@ type Message = {
                   
                   <Separator />
                   
-                  {selectedRecord.type === 'call' ? (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Phone Number</p>
-                                <p className="font-medium">{selectedRecord.phoneNo}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Agent</p>
-                                <p className="font-medium">{selectedRecord.agentName}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              <CalendarClock className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="text-sm text-muted-foreground">Duration</p>
-                                <p className="font-medium">{selectedRecord.duration}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                        <Card>
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                              {selectedRecord.callType === 'incoming' ? (
-                                <PhoneIncoming className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <PhoneOutgoing className="h-4 w-4 text-muted-foreground" />
-                              )}
-                              <div>
-                                <p className="text-sm text-muted-foreground">Call Type</p>
-                                <p className="font-medium capitalize">{selectedRecord.callType}</p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <h4 className="font-medium mb-2 flex items-center gap-2">
-                          <Volume2 className="h-4 w-4" />
-                          Call Transcript
-                        </h4>
-                        <ScrollArea className="max-h-[400px] overflow-y-scroll w-full rounded-md border p-4">
-                          <div className="whitespace-pre-line">
-                          {selectedRecord?.transcript?.map((message:any) => (
-                              <TranscriptMessage key={message.id} message={message} />
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    </div>
-                  ) : (
+                
                     <div className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <Card>
@@ -388,17 +314,17 @@ type Message = {
                         </h4>
                         <ScrollArea className="max-h-[450px] overflow-y-scroll w-full rounded-md border p-4 bg-background">
                           <div className="space-y-4">
-                            {selectedRecord.chatContent?.map((message:any) => (
-                              <ChatMessage key={message.id} message={message} />
+                            {chatHistory?.map((message:any) => (
+                              <ChatMessage key={message?._id} message={message} />
                             ))}
                           </div>
                         </ScrollArea>
                       </div>
                     </div>
-                  )}
+                  
 
                   <div className="mx-auto w-full flex justify-center">
-                    <Link href={selectedRecord.type==="call"?"/call-management/3425/view":"/chat/342/view"}>
+                    <Link href={`/chat/${selectedRecord?._id}/view`}>
                       <Button className="common-btn text-white">
                         View Details
                       </Button>
@@ -412,22 +338,7 @@ type Message = {
       </div>
     );
   };
-const data: any = [
-    {
-        name: "Cameron Williamson",
-        email: "c.williamson@gmail.com",
-        phone_number: "N/A",
-        country: "United States"
-    },
-  
-    {
-        name: "Cameron Williamson",
-        email: "c.williamson@gmail.com",
-        phone_number: "232323234",
-        country: "India"
-    },
 
-];
 
 const columns:any = [
     {
@@ -441,7 +352,7 @@ const columns:any = [
     {
         header:"Chat ID",
         cell: ({ row }: { row: { index: number; original: RecordType } }) => {
-          return <span className="text-blue-500">{"#" +row.index + 5228762}</span>; 
+          return <span className="text-blue-500">{row.index + 5228762}</span>; 
         },
       //   enableSorting: false,
       //   enableHiding: false,
@@ -473,7 +384,34 @@ const columns:any = [
       header: "Country",
     },
     {
-        header:"Recent Message",
+      accessorKey: "last_message",
+      header: "Recent Message",
+      cell: ({ row }: { row: any  }) => {
+
+        return (
+          <div>
+            <p className="font-normal">
+              {row.original?.last_message?row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.last_message?.summary:"N/A"}
+            </p>
+          </div>
+        );
+      }
+
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: { row: any }) => {
+
+        return (
+        
+           <Badge className={`rounded-xl text-white font-medium ${row.original.status === "ACTIVE" ? "bg-blue-400" : "bg-green-500"}`}>
+                {row.original.status === "ACTIVE" ? "Active" : "Completed"}
+           </Badge>
+           
+      
+        );
+      },
     },
     {
       accessorKey:"chat",
@@ -537,6 +475,88 @@ export type Payment = {
 
 
 function Contact() {
+  const [isLoading, setIsLoading] = React.useState<boolean>(false)
+
+  const searchParams = useSearchParams()
+ 
+  const [activeTab, setActiveTab] = React.useState("ALL");
+  const [chatState, setChatState] = React.useState<any>({
+    data:[],
+    count:0
+  });
+
+  const initData = async () => {
+    setIsLoading(true);
+    try {
+      let urlSearchParam = new URLSearchParams();
+
+      if (searchParams.get('pagination')) {
+        urlSearchParam.set("pagination", String(Number(searchParams.get('pagination')) - 1));
+      }else{
+        urlSearchParam.set("pagination", String(0));
+      }
+      if (searchParams.get('search')) {
+        urlSearchParam.set("search", String(searchParams.get('search')));
+        urlSearchParam.set("pagination", String(Number(0)));
+      }
+      if (activeTab) {
+         if(activeTab!="ALL"){
+
+           urlSearchParam.set("status",activeTab.toString());
+         }
+        } 
+      
+      if (searchParams.get('limit')) {
+        urlSearchParam.set("limit", String(10));
+      }else{
+
+        urlSearchParam.set("limit", String(searchParams.get('limit') ?? 10));
+      }
+      urlSearchParam.set("type", "CHAT");
+
+
+      let apiRes = await henceforthApi.SuperAdmin.callListing(
+        urlSearchParam.toString()
+      )
+      setChatState(apiRes);
+
+    } catch (error) {
+      console.error(error);
+    }
+    finally{
+      setIsLoading(false);
+    }
+  }
+  const skeletonColumns = columns.map((column:any) => ({
+    ...column,
+    cell: () => <Skeleton className="h-8 w-full" />
+  }));
+
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-16 w-16 mb-4 text-gray-300" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+        />
+      </svg>
+      <h3 className="text-lg font-semibold mb-2">No Records Found</h3>
+      <p className="text-sm text-center">There are no chats available for the selected filter.</p>
+    </div>
+  );
+
+  React.useEffect(() => {
+    initData();
+  }, [searchParams.toString(), activeTab])
+
 
 
     const pathname = usePathname();
@@ -546,48 +566,121 @@ function Contact() {
 
             <div className="container mx-auto px-6 py-2">
                 <div>
-                    <p className="heading">{"Chat"}</p>
+                    <p className="heading mb-3">{"Chat"}</p>
                 </div>
-                <div className="flex justify-between items-center py-4">
-                    <Input
-                        placeholder="Search and filter"
-                        // value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-                        // onChange={(event) =>
-                        //     table.getColumn("email")?.setFilterValue(event.target.value)
-                        // }
-                        className="max-w-sm"
+               
 
-                        type="search"
-                    />
-                </div>
+                <Tabs defaultValue="ALL" className="w-full mb-6" onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-3 h-12 p-1 bg-gray-100 rounded-full shadow-inner">
+            <TabsTrigger
+              className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "ALL"
+                ? "bg-primary text-white shadow-md"
+                : "text-gray-500 hover:bg-gray-200"
+                }`}
+              value="ALL"
+            >
+              <span className={`${activeTab === "ALL"
+                ? " text-blue-500 "
+                : "text-gray-500 hover:bg-gray-200"
+                }`}> All Chats</span>
+            </TabsTrigger>
+            <TabsTrigger
+              className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "ACTIVE"
+                ? "bg-primary text-white shadow-md"
+                : "text-gray-500 hover:bg-gray-200"
+                }`}
+              value="ACTIVE"
+            >
+              <span className={`${activeTab === "ACTIVE"
+                ? " text-blue-500 "
+                : "text-gray-500 hover:bg-gray-200"
+                }`}> Active Chats</span>
+            </TabsTrigger>
+            <TabsTrigger
+              className={`flex items-center justify-center p-2 rounded-full font-semibold transition-colors duration-300 ${activeTab === "COMPLETE"
+                ? "bg-primary text-white shadow-md"
+                : "text-gray-500 hover:bg-gray-200"
+                }`}
+              value="COMPLETE"
+            >
+              <span className={`${activeTab === "COMPLETE"
+                ? " text-blue-500"
+                : "text-gray-500 hover:bg-gray-200"
+                }`}> Previous Chats</span>
+            </TabsTrigger>
+          </TabsList>
 
-                <div className=" mx-auto ">
-                    <DataTable columns={columns} data={listingData} totalItems={data.length}/>
-                </div>
-                {/* <div className="flex items-center justify-end space-x-2 py-4">
-                    <div className="flex-1 text-sm text-muted-foreground">
-                        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                        {table.getFilteredRowModel().rows.length} row(s) selected.
-                    </div>
-                    <div className="space-x-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
-                        >
-                            Previous
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
-                        >
-                            Next
-                        </Button>
-                    </div>
-                </div> */}
+          { chatState?.count>0 && <div className="flex justify-between items-center pt-6">
+              <Input
+                placeholder="Search and filter"
+                className="max-w-sm"
+                type="search"
+              />
+            </div>}
+
+          <TabsContent value="ALL" className="mt-4">
+           
+            <div className="mx-auto">
+            {isLoading ? (
+                <DataTable
+                  columns={skeletonColumns}
+                  data={Array(5).fill({})}
+                  totalItems={0}
+                />
+              ) : chatState?.data?.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={chatState?.data}
+                  totalItems={chatState?.count}
+                />
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="ACTIVE" className="mt-4">
+            
+            <div className="mx-auto">
+            {isLoading ? (
+                <DataTable
+                  columns={skeletonColumns}
+                  data={Array(5).fill({})}
+                  totalItems={0}
+                />
+              ) : chatState?.data?.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={chatState?.data}
+                  totalItems={chatState?.count}
+                />
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="COMPLETE" className="mt-4">
+            
+            <div className="mx-auto">
+            {isLoading ? (
+                <DataTable
+                  columns={skeletonColumns}
+                  data={Array(5).fill({})}
+                  totalItems={0}
+                />
+              ) : chatState?.data?.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={chatState?.data}
+                  totalItems={chatState?.count}
+                />
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+             
             </div>
         </PageContainer>
     )

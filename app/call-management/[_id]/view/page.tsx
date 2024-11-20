@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -13,11 +14,49 @@ import {
   FileText,
   Download,
   Share2,
+  Loader,
 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import PageContainer from "@/components/layout/page-container";
+import { useParams, useSearchParams } from "next/navigation";
+import henceforthApi from "@/utils/henceforthApi";
+import dayjs from "dayjs";
+
 
 function DetailPage() {
+ const searchParams=useSearchParams();
+ const params=useParams();
+ console.log(params,"params");
+ const [callDetails,setCallDetails]=React.useState<any>(); 
+ const [transcript, setTranscript] = React.useState<any[]>([]);
+ const [loadingTranscript, setLoadingTranscript] = React.useState(false);
+ const getTranscription = async() => {
+  setLoadingTranscript(true);
+   try {
+     const apiRes =await henceforthApi.SuperAdmin.getTranscription(String(params?._id));
+     setTranscript(apiRes?.data);
+   } catch (error) {
+     
+   }finally{
+    setLoadingTranscript(false);
+   }
+ }
+
+ const initDetails=async()=>{
+  try {
+    const apiRes = await henceforthApi.SuperAdmin.callDetail(String(params?._id));
+   
+      setCallDetails(apiRes?.data[0]);
+   
+  } catch (error) {
+    console.error(error);
+  }
+ }
+ useEffect(() => {
+  initDetails();
+  getTranscription()
+}, []);
+console.log(callDetails,"callDetails");
   return (
     <PageContainer scrollable>
     <div className="container mx-auto py-6 space-y-6 max-w-7xl">
@@ -28,10 +67,10 @@ function DetailPage() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="outline" className="text-blue-500 border-blue-500">
-                  Call ID: #123456
+                  Call ID: {callDetails?.call_id}
                 </Badge>
                 <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                  Completed
+                 {callDetails?.status==="COMPLETE"?"Completed":"Active"}
                 </Badge>
               </div>
               {/* <CardTitle className="text-2xl font-bold">
@@ -58,7 +97,7 @@ function DetailPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Date</p>
-                <p className="font-medium">May 20, 2024</p>
+                <p className="font-medium">{dayjs(callDetails?.created_at).format("DD MMM YYYY")}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -67,7 +106,7 @@ function DetailPage() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Duration</p>
-                <p className="font-medium">45 minutes</p>
+                <p className="font-medium">{callDetails?.call_duration + "s"}</p>
               </div>
             </div>
             {/* <div className="flex items-center gap-3">
@@ -101,12 +140,7 @@ function DetailPage() {
         <Card>
           <CardContent className="p-6">
             <p className="text-gray-600 leading-relaxed">
-              This call discussed the new product launch strategy. Key points
-              included marketing timeline, budget allocation, and target audience
-              segmentation. The client showed particular interest in social media
-              campaigns and requested detailed analytics for previous campaigns.
-              Action items were assigned with respective deadlines, and a follow-up
-              meeting was scheduled for next week.
+              {callDetails?.summary}
             </p>
           </CardContent>
         </Card>
@@ -123,7 +157,7 @@ function DetailPage() {
             <CardContent className="p-6">
               <div className="space-y-4">
                 {/* Speaker 1 */}
-                <div>
+                {/* <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant="secondary">John Doe</Badge>
                     <span className="text-sm text-muted-foreground">00:00</span>
@@ -135,7 +169,7 @@ function DetailPage() {
                 </div>
 
                 {/* Speaker 2 */}
-                <div>
+                {/* <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant="secondary">Sarah Smith</Badge>
                     <span className="text-sm text-muted-foreground">00:15</span>
@@ -144,23 +178,23 @@ function DetailPage() {
                     Hi John, thanks for having me. I've reviewed the preliminary
                     materials you sent over.
                   </p>
-                </div>
+                </div>  */}
 
                 {/* More transcript entries... */}
-                {Array.from({ length: 5 }).map((_, index) => (
+                {loadingTranscript?<div className="flex min-h-screen  justify-center h-full">
+          <Loader className="h-8 w-8 animate-spin" />
+        </div>:Array.isArray(transcript) && transcript?.map((item:any,index:number) => (
                   <div key={index}>
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="secondary">
-                        {index % 2 === 0 ? "John Doe" : "Sarah Smith"}
+                        {item.role==="model"? "AI" : "User"}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {`00:${(index + 2) * 15}`}
+                        {/* {`00:${(index + 2) * 15}`} */}
                       </span>
                     </div>
                     <p className="text-gray-600 pl-4">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                      do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua.
+                      {item.text}
                     </p>
                   </div>
                 ))}
