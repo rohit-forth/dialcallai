@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [visibility, setVisibility] = useState(false);
   const [password, setPassword] = useState('');
-  const { setUserInfo } = useGlobalContext();
+  const { setUserInfo,Toast } = useGlobalContext();
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     const payload={

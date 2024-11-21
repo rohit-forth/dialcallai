@@ -23,7 +23,7 @@ import toast from 'react-hot-toast';
 const ProfileView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const { userInfo,getProfile } = useGlobalContext();
+  const { userInfo,getProfile,Toast } = useGlobalContext();
   console.log(userInfo);
   const handleOpenModal = () => {
     setIsModalOpen(true);

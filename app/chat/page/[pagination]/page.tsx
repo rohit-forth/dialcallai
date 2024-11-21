@@ -358,8 +358,8 @@ const columns:any = [
     },
     {
         header:"Chat ID",
-        cell: ({ row }: { row: { index: number; original: RecordType } }) => {
-          return <span className="text-blue-500">{row.index + 5228762}</span>; 
+        cell: ({ row }: { row: any }) => {
+          return <span className="text-blue-500">{row.original?._id}</span>; 
         },
       //   enableSorting: false,
       //   enableHiding: false,

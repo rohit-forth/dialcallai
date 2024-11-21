@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import henceforthApi from '@/utils/henceforthApi';
 import { toast } from 'react-hot-toast';
+import { useGlobalContext } from '@/components/providers/Provider';
 
 const countries = [
     { code: 'AF', name: 'Afghanistan', dialCode: '+93' },
@@ -227,6 +228,7 @@ const countries = [
 const TestPage = () => {
     const [countryCode, setCountryCode] = useState(countries[73]?.code);
     const [phoneNumber, setPhoneNumber] = useState('');
+    const {Toast}=useGlobalContext();
     const [error, setError] = useState('');
 
     const handleSubmit = async(event: React.FormEvent) => {

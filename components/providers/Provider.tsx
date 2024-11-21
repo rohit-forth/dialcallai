@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"; // Updated to next/navigation
 import { destroyCookie } from "nookies";
 import henceforthApi from "@/utils/henceforthApi";
 import { formatDuration } from "date-fns";
+import toast from "react-hot-toast";
 
 interface UserInfo {
   access_token?: string;
@@ -18,6 +19,7 @@ interface GlobalContextType {
   stopSpaceEnter: (event: React.KeyboardEvent) => boolean;
   getProfile: () => Promise<void>;
   formatDuration: (seconds: number) => string;
+  Toast:any
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -26,7 +28,7 @@ interface GlobalProviderProps {
   children: ReactNode;
   userInfo?: UserInfo;
 }
-
+type ToastFunction = (msg: any) => void;
 export function GlobalProvider({ children, userInfo: initialUserInfo }: GlobalProviderProps) {
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(initialUserInfo || null);
@@ -90,6 +92,34 @@ export function GlobalProvider({ children, userInfo: initialUserInfo }: GlobalPr
     return '0 s';
   };
 
+  const success: ToastFunction = (message: string) => {
+    toast.success(message, {
+      duration: 2000,
+      style: {
+        fontSize: "13px",
+        backgroundColor: "#fff",
+      },
+    });
+  };
+  // Error toast
+  const error: ToastFunction = (err: any) => {
+    const errorBody = err?.response?.body;
+    const message =
+      typeof err === "string" ? err : errorBody?.message || "An error occurred";
+    toast.error(message, {
+      duration: 2000,
+      style: {
+        fontSize: "13px",
+        backgroundColor: "#fff",
+      },
+    });
+  };
+  // Toast object
+  const Toast = {
+    success,
+    error,
+  };
+
   const logout = async () => {
     setUserInfo(null);
     destroyCookie(null, "COOKIES_ADMIN_ACCESS_TOKEN", {
@@ -115,7 +145,8 @@ export function GlobalProvider({ children, userInfo: initialUserInfo }: GlobalPr
     userInfo,
     stopSpaceEnter,
     getProfile,
-    formatDuration
+    formatDuration,
+    Toast
   };
 
   return (

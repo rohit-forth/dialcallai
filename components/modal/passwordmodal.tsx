@@ -8,13 +8,14 @@ import { HelpCircle, Eye, EyeOff, Check, AlertCircle, KeySquare } from "lucide-r
 import { Icons } from "@/components/icons";
 import toast from 'react-hot-toast';
 import henceforthApi from '@/utils/henceforthApi';
+import { useGlobalContext } from '../providers/Provider';
 
 const PasswordChangeDialog = () => {
   const [open, setOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+  const {Toast}=useGlobalContext();
   const [visibility, setVisibility] = useState({
     old: false,
     new: false,

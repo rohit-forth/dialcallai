@@ -416,11 +416,11 @@ const Dashboard = () => {
         row.original?.type === "CALL" ? <PhoneCall className="h-5 w-5 text-blue-500" /> : <MessagesSquare className="h-5 w-5 text-blue-500" />
       ),
     },
-    {
-      accessorKey: 'phone_no',
-      header: 'Phone/Name',
-      cell: ({ row }:{row:any}) => (row.original.type === 'call' ? row.original.phoneNo : row.original.name),
-    },
+    // {
+    //   accessorKey: 'phone_no',
+    //   header: 'Phone/Name',
+    //   cell: ({ row }:{row:any}) => (row.original.type === 'CALL' ? row.original?.phone_no : row.original?.name),
+    // },
 
     {
       accessorKey: 'dateTime',
@@ -435,7 +435,7 @@ const Dashboard = () => {
           return (
             <div>
             <p className="font-normal">
-              {row.original?.last_message?.length? row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.original?.last_message:"N/A"}
+              {row.original?.last_message?.length? row.original?.last_message?.length > 30 ? row.original?.last_message?.slice(0, 30)+"..." : row.original?.last_message:"N/A"}
             </p>
           </div>
           );
