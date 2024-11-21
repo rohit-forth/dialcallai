@@ -46,6 +46,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import henceforthApi from "@/utils/henceforthApi"
 import dayjs from "dayjs"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useGlobalContext } from "@/components/providers/Provider"
+
 type Message = {
   id: number;
   content: string;
@@ -94,15 +96,21 @@ const TranscriptMessage = ({ message }: { message: any }) => (
 const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord:any }) => {
   if (!selectedRecord) return null;
   const [transcript, setTranscript] = React.useState<any[]>([]);
-  const getTranscription = async() => {
-    try {
-      const apiRes =await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
-      setTranscript(apiRes?.data);
-    } catch (error) {
-      
+  const {formatDuration}=useGlobalContext()
+  React.useEffect(() => {
+    const getTranscription = async () => {
+      try {
+        const apiRes = await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
+        setTranscript(apiRes?.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (selectedRecord) {
+      getTranscription();
     }
-  }
-  getTranscription()
+  }, [selectedRecord]);
   
   return (
     <div className="space-y-6">
@@ -114,32 +122,23 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg mt-4 font-semibold flex items-center gap-2">
-            
                 <>
                   <PhoneCall className="h-5 w-5" />
                   Call Details
                 </>
-      
-             
             </h3>
-            {/* <Badge variant={selectedRecord.type === 'call' ? 'default' : 'secondary'}>
-                      {selectedRecord.type.toUpperCase()}
-                    </Badge> */}
           </div>
-
           <Separator />
-
-          
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
-              
-                <Card>
+                  <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
+                  
+                        <PhoneIncoming className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Agent</p>
-                        <p className="font-medium">{selectedRecord.agentName}</p>
+                        <p className="text-sm text-muted-foreground">Call Type</p>
+                        <p className="font-medium capitalize">{"Incoming"}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -150,28 +149,12 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
                       <CalendarClock className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm text-muted-foreground">Duration</p>
-                        <p className="font-medium">{selectedRecord?.call_duration+"s"}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2">
-                  
-                        <PhoneIncoming className="h-4 w-4 text-muted-foreground" />
-                      
-     
-                      
-                      <div>
-                        <p className="text-sm text-muted-foreground">Call Type</p>
-                        <p className="font-medium capitalize">{"Incoming"}</p>
+                        <p className="font-medium">{formatDuration(selectedRecord?.call_duration)}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
-
               <div className="mb-3">
                 <h4 className="font-medium mb-2 flex items-center gap-2">
                   <Volume2 className="h-4 w-4" />
@@ -186,8 +169,6 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
                 </ScrollArea>
               </div>
             </div>
-          
-
           <div className="mx-auto w-full flex justify-center">
             <Link href={`/call-management/${selectedRecord?._id}/view`}>
               <Button className="common-btn text-white">
@@ -196,9 +177,6 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
             </Link>
           </div>
         </div>
-
-
-
       )}
     </div>
   );
@@ -221,9 +199,9 @@ export type Payment = {
 
 function DataTableDemo() {
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
-  const router = useRouter();
+   const {formatDuration}=useGlobalContext()
   const searchParams = useSearchParams()
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  // const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [activeTab, setActiveTab] = React.useState("ALL");
   const [callState, setCallState] = React.useState<any>({
     data:[],
@@ -300,7 +278,7 @@ function DataTableDemo() {
       header: "Call Duration",
       cell: ({ row }: { row: { original: { call_duration: number } } }) => (
         <div className="">
-          {row.original.call_duration+"s"}
+          {formatDuration(row.original.call_duration)}
         </div>
       ),
     },
@@ -322,7 +300,7 @@ function DataTableDemo() {
         return (
           <div>
             <p className="font-normal">
-              {row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.last_message?.summary}
+              {row.original?.last_message?.length? row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.original?.last_message:"N/A"}
             </p>
           </div>
         );

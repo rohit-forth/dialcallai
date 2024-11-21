@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -108,19 +108,58 @@ const TranscriptMessage = ({ message }: { message: any }) => (
     </p>
   </div>
 )
-const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord: any }) => {
+const SheetContentComponent = ({ isLoading, selectedRecord,isSheetOpen }: { isLoading: boolean, selectedRecord: any,isSheetOpen:boolean }) => {
   if (!selectedRecord) return null;
 
   const [sheetContent, setSheetContent] = React.useState<any[]>([]);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const lastContentLengthRef = useRef(0);
+
   const getTranscription = async() => {
     try {
-      const apiRes =await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
+      const apiRes = await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
       setSheetContent(apiRes?.data);
     } catch (error) {
-      
+      console.error(error);
     }
   }
-  getTranscription()
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | undefined;
+
+    if (isSheetOpen) {
+      getTranscription(); // Call immediately
+      intervalId = setInterval(() => {
+        getTranscription();
+      }, 5000);
+    } else {
+      clearInterval(intervalId);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isSheetOpen]);
+
+  useEffect(() => {
+    const scrollToBottom = () => {
+      if (scrollAreaRef.current) {
+        const scrollArea = scrollAreaRef.current;
+        
+        // Only scroll to bottom if content length has changed
+        if (sheetContent.length !== lastContentLengthRef.current) {
+          scrollArea.scrollTop = scrollArea.scrollHeight;
+          lastContentLengthRef.current = sheetContent.length;
+        }
+      }
+    };
+
+    scrollToBottom();
+    
+    const timer = setTimeout(scrollToBottom, 50);
+
+    return () => clearTimeout(timer);
+  }, [sheetContent]);
+  
+
 
   return (
     <div className="space-y-6">
@@ -209,12 +248,13 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
                   <Volume2 className="h-4 w-4" />
                   Call Transcript
                 </h4>
-                <ScrollArea className="max-h-[400px] overflow-y-scroll w-full rounded-md border p-4">
+                <ScrollArea  ref={scrollAreaRef}  className="max-h-[400px] overflow-y-scroll w-full rounded-md border p-4">
                   <div className="whitespace-pre-line">
                     {sheetContent?.map((message: any) => (
                       <TranscriptMessage key={message?._id} message={message} />
                     ))}
                   </div>
+                  <ScrollBar orientation='vertical'/> 
                 </ScrollArea>
               </div>
             </div>
@@ -272,12 +312,13 @@ const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boole
                   <MessageSquare className="h-4 w-4" />
                   Chat History
                 </h4>
-                <ScrollArea className="max-h-[450px] overflow-y-scroll w-full rounded-md border p-4 bg-background">
+                <ScrollArea  ref={scrollAreaRef} className="max-h-[450px] overflow-y-scroll w-full rounded-md border p-4 bg-background">
                   <div className="space-y-4">
                     {sheetContent?.map((message: any) => (
                       <ChatMessage key={message?._id} message={message} />
                     ))}
                   </div>
+                  <ScrollBar orientation='vertical'/>
                 </ScrollArea>
               </div>
             </div>
@@ -307,16 +348,20 @@ const Dashboard = () => {
       "total_chat": 0
     }
   });
+  const [timePeriod, setTimePeriod] = useState('YEAR');
   
   const initCards = async () => {
     try {
-      let apiRes = await henceforthApi.SuperAdmin.dashboardCards();
+      let apiRes = await henceforthApi.SuperAdmin.dashboardCards(timePeriod);
       setCardsData(apiRes);
     } catch (error) {
       console.error(error);
     }
-
   }
+
+  React.useEffect(() => {
+    initCards();
+  }, [timePeriod]);
   const initData = async () => {
     setIsLoading(true);
     try {
@@ -389,24 +434,18 @@ const Dashboard = () => {
         if (row.original.type === 'call') {
           return (
             <div>
-              <p className="font-normal">
-                {row.original.transcript && row.original.transcript[0]
-                  ? row.original.transcript[0].content.length > 30
-                    ? row.original.transcript[0].content.slice(0, 30) + "..."
-                    : row.original.transcript[0].content
-                  : "N/A"}
-              </p>
-            </div>
+            <p className="font-normal">
+              {row.original?.last_message?.length? row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.original?.last_message:"N/A"}
+            </p>
+          </div>
           );
         }
         return (
           <div>
-            <p className="font-normal">{row.original.transcript && row.original.transcript[0]
-              ? row.original.transcript[0].content.length > 30
-                ? row.original.transcript[0].content.slice(0, 30) + "..."
-                : row.original.transcript[0].content
-              : "N/A"}</p>
-          </div>
+          <p className="font-normal">
+            {row.original?.last_message?.length? row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.original?.last_message:"N/A"}
+          </p>
+        </div>
         );
       },
     },
@@ -440,6 +479,7 @@ const Dashboard = () => {
           await new Promise(resolve => setTimeout(resolve, 1000));
           setIsLoading(false);
         };
+       
 
         return (
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -459,6 +499,7 @@ const Dashboard = () => {
               side="right"
             >
               <SheetContentComponent
+                isSheetOpen={isSheetOpen}
                 isLoading={isLoading}
                 selectedRecord={selectedRecord}
               />
@@ -513,7 +554,7 @@ const Dashboard = () => {
   //   setIsLoading(false);
   // };
 
-  const [timePeriod, setTimePeriod] = useState('year');
+  
 
   return (
     <PageContainer scrollable>
@@ -643,7 +684,7 @@ const Dashboard = () => {
               </CardTitle>
               <div className="flex flex-col items-end">
                 <Select
-                  defaultValue="year"
+                  defaultValue="YEAR"
                   onValueChange={setTimePeriod}
                 >
                   <SelectTrigger
@@ -653,10 +694,10 @@ const Dashboard = () => {
                     <SelectValue placeholder="Select period" />
                   </SelectTrigger>
                   <SelectContent className='bg-white'>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="year">This Year</SelectItem>
+                    <SelectItem value="TODAY">Today</SelectItem>
+                    <SelectItem value="WEAK">This Week</SelectItem>
+                    <SelectItem value="MONTH">This Month</SelectItem>
+                    <SelectItem value="YEAR">This Year</SelectItem>
                   </SelectContent>
                 </Select>
                 <Phone className="h-4 w-4 text-muted-foreground group-hover:text-green-700 transition-colors duration-300 mt-2" />

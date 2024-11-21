@@ -225,15 +225,22 @@ type Message = {
   const SheetContentComponent = ({ isLoading, selectedRecord }: { isLoading: boolean, selectedRecord:any}) => {
     if (!selectedRecord) return null;
     const [chatHistory, setChatHistory] = React.useState<any[]>([]);
-    const getChatHistory = async() => {
-      try {
-        const apiRes =await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
-        setChatHistory(apiRes?.data);
-      } catch (error) {
-        
+    
+    React.useEffect(() => {
+      const getChatHistory = async() => {
+        try {
+          const apiRes =await henceforthApi.SuperAdmin.getTranscription(selectedRecord?._id);
+          setChatHistory(apiRes?.data);
+        } catch (error) {
+          
+        }
       }
-    }
-    getChatHistory()
+      if(selectedRecord){
+        getChatHistory();
+      }
+    }, [selectedRecord]);
+    
+   
     return (
       <div className="space-y-6">
        {isLoading ? (
@@ -391,7 +398,7 @@ const columns:any = [
         return (
           <div>
             <p className="font-normal">
-              {row.original?.last_message?row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.last_message?.summary:"N/A"}
+              {row.original?.last_message?row.original?.last_message?.length > 20 ? row.original?.last_message?.slice(0, 20)+"..." : row.original.last_message:"N/A"}
             </p>
           </div>
         );

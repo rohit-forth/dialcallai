@@ -21,11 +21,13 @@ import PageContainer from "@/components/layout/page-container";
 import { useParams, useSearchParams } from "next/navigation";
 import henceforthApi from "@/utils/henceforthApi";
 import dayjs from "dayjs";
+import { useGlobalContext } from "@/components/providers/Provider";
 
 
 function DetailPage() {
  const searchParams=useSearchParams();
  const params=useParams();
+ const {formatDuration}=useGlobalContext()
  console.log(params,"params");
  const [callDetails,setCallDetails]=React.useState<any>(); 
  const [transcript, setTranscript] = React.useState<any[]>([]);
@@ -106,7 +108,7 @@ console.log(callDetails,"callDetails");
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Duration</p>
-                <p className="font-medium">{callDetails?.call_duration + "s"}</p>
+                <p className="font-medium">{formatDuration(callDetails?.call_duration)}</p>
               </div>
             </div>
             {/* <div className="flex items-center gap-3">

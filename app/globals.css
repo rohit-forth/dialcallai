@@ -13,7 +13,7 @@
     --scrollbar-track-radius: theme('borderRadius.lg');
     --background: 0, 0%, 100%, 1;
     --foreground: 20 51% 4%;
-    --muted: rgb(185, 179, 179);
+    --muted: 43deg 18.99% 16.33% / 14%;
     --muted-foreground: 20 7% 25%;
     --popover: hsla(217, 100%, 97%, 1);
     --popover-foreground: 20 51% 3%;

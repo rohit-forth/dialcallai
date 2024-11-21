@@ -4,6 +4,7 @@ import { createContext, useContext, ReactNode, useState } from "react";
 import { useRouter } from "next/navigation"; // Updated to next/navigation
 import { destroyCookie } from "nookies";
 import henceforthApi from "@/utils/henceforthApi";
+import { formatDuration } from "date-fns";
 
 interface UserInfo {
   access_token?: string;
@@ -16,6 +17,7 @@ interface GlobalContextType {
   userInfo: UserInfo | null;
   stopSpaceEnter: (event: React.KeyboardEvent) => boolean;
   getProfile: () => Promise<void>;
+  formatDuration: (seconds: number) => string;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -50,6 +52,44 @@ export function GlobalProvider({ children, userInfo: initialUserInfo }: GlobalPr
     return true;
   };
 
+  const formatDuration = (seconds: number): string => {
+    // Handle invalid or negative inputs
+    if (seconds < 0 || isNaN(seconds)) return '0 s';
+  
+    // Define time units
+    const units = [
+      { name: 'd', seconds: 86400 },
+      { name: 'h', seconds: 3600 },
+      { name: 'm', seconds: 60 },
+      { name: 's', seconds: 1 }
+    ];
+  
+    // Find the appropriate unit and calculate
+    for (const unit of units) {
+      if (seconds >= unit.seconds) {
+        const value = Math.floor(seconds / unit.seconds);
+        const remainder = seconds % unit.seconds;
+  
+        // Construct the primary unit part
+        let result = `${value} ${unit.name}`;
+  
+        // Add secondary unit if there's a significant remainder
+        if (unit.name !== 's' && remainder > 0) {
+          const nextUnit = units[units.indexOf(unit) + 1];
+          const nextValue = Math.floor(remainder / nextUnit.seconds);
+          
+          if (nextValue > 0) {
+            result += ` ${nextValue} ${nextUnit.name}`;
+          }
+        }
+  
+        return result;
+      }
+    }
+  
+    return '0 s';
+  };
+
   const logout = async () => {
     setUserInfo(null);
     destroyCookie(null, "COOKIES_ADMIN_ACCESS_TOKEN", {
@@ -75,6 +115,7 @@ export function GlobalProvider({ children, userInfo: initialUserInfo }: GlobalPr
     userInfo,
     stopSpaceEnter,
     getProfile,
+    formatDuration
   };
 
   return (

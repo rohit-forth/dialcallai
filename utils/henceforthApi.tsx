@@ -113,7 +113,7 @@ const SuperAdmin = {
   profile: (type?: any) => requests.get(type ? `admin/profile?${type}` : `admin/profile`),
   updateProfile: (info: any) => requests.put("admin/profile", info),
   callListing: (q: any) => requests.get(`admin/call${q ? `?${q}` : ""}`),
-  dashboardCards: () => requests.get("admin/dashboard"),
+  dashboardCards: (type?:any) => requests.get(type?`admin/dashboard?type=${type}`:"admin/dashboard"),
   getTranscription: (id: string) => requests.get(`admin/call/${id}/transcript`),
   callDetail: (id: string) => requests.get(`admin/call/${id}`),
 };
