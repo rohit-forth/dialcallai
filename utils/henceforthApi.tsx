@@ -116,6 +116,7 @@ const SuperAdmin = {
   dashboardCards: (type?:any) => requests.get(type?`admin/dashboard?type=${type}`:"admin/dashboard"),
   getTranscription: (id: string) => requests.get(`admin/call/${id}/transcript`),
   callDetail: (id: string) => requests.get(`admin/call/${id}`),
+  submitPhoneNumber:(info:any)=>requests.post(`twilio/send-call-admin`,info),
 };
 const Company = {
   add: (info: any) => requests.post("admin/company", info),

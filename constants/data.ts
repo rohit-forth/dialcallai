@@ -150,6 +150,15 @@ navItems: NavItem[] = [
     ]
   },
   {
+    title: 'Test',
+    url: '/test',
+    icon: 'Test',
+    isActive: false,
+    items: [
+     
+    ]
+  },
+  {
     title:'Logout',
     url:'#',
     icon:'LogoutRed',
