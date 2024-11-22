@@ -1,17 +1,30 @@
-// Protecting routes with next-auth
-// https://next-auth.js.org/configuration/nextjs#middleware
-// https://nextjs.org/docs/app/building-your-application/routing/middleware
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-import NextAuth from 'next-auth';
-import authConfig from './auth.config';
+export function middleware(req: NextRequest) {
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get('COOKIES_ADMIN_ACCESS_TOKEN')?.value;
+  const isLoginPage = req.nextUrl.pathname === '/';
 
-const { auth } = NextAuth(authConfig);
-
-export default auth((req) => {
-  if (!req.auth) {
-    const url = req.url.replace(req.nextUrl.pathname, '/');
-    return Response.redirect(url);
+  if (!accessToken && !isLoginPage) {
+    return NextResponse.redirect(new URL('/', req.url));
   }
-});
 
-export const config = { matcher: ['/dashboard1/:path*'] };
+  if (accessToken && isLoginPage) {
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    '/',
+    '/dashboard',
+    '/call-management/:path*',
+    '/chat/:path*',
+    
+    
+  ],
+};

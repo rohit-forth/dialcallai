@@ -1,3 +1,4 @@
+"use client"
 import {
     AlertDialogAction,
     AlertDialogCancel,
@@ -7,7 +8,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { useGlobalContext } from "../providers/Provider"
 const DialogContentCommon = (props: any) => {
+    const {logout}=useGlobalContext();
+    
     return (
         <AlertDialogContent>
             <AlertDialogHeader>
@@ -18,7 +22,7 @@ const DialogContentCommon = (props: any) => {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className={"bg-red-400 text-white"}>Yes, log me out</AlertDialogAction>
+                <AlertDialogAction onClick={()=>logout()} className={"bg-red-400 text-white"}>Yes, log me out</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
     )

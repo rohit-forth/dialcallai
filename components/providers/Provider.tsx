@@ -121,11 +121,12 @@ export function GlobalProvider({ children, userInfo: initialUserInfo }: GlobalPr
   };
 
   const logout = async () => {
+    console.log("fgjfvjdvjjhvcjhdsksj")
     setUserInfo(null);
     destroyCookie(null, "COOKIES_ADMIN_ACCESS_TOKEN", {
       path: "/",
     });
-    router.replace("/auth/login");
+    router.replace("/");
   };
 
   const getProfile = async () => {
