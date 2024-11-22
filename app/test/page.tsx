@@ -237,8 +237,8 @@ const TestPage = () => {
 
         // Basic phone number validation
         
-        if (phoneNumber.length<8 || phoneNumber.length>15) {
-            setError('Please enter a valid 8 to 15 digit phone number');
+        if (phoneNumber.length<7 || phoneNumber.length>15) {
+            setError('Please enter a valid 7 to 15 digit phone number');
             return;
         }
 
@@ -303,7 +303,7 @@ const TestPage = () => {
                             <Input 
                                 type="tel" 
                                 id="phone"
-                                placeholder="Enter 10-digit phone number" 
+                                placeholder="Enter phone number" 
                                 value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
                                 className="mt-2"
