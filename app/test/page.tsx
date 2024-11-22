@@ -236,9 +236,9 @@ const TestPage = () => {
         setError('');
 
         // Basic phone number validation
-        const phoneRegex = /^\d{8}$/;
-        if (!phoneRegex.test(phoneNumber)) {
-            setError('Please enter a valid 8-digit phone number');
+        
+        if (phoneNumber.length<8 || phoneNumber.length>15) {
+            setError('Please enter a valid 8 to 15 digit phone number');
             return;
         }
 
