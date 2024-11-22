@@ -254,10 +254,10 @@ const TestPage = () => {
         try {
 
             const apiRes=await henceforthApi.SuperAdmin.submitPhoneNumber(payload);
-            toast.success('Phone number submitted successfully');
+            Toast.success('Phone number submitted successfully');
             
-        } catch (error) {
-            
+        } catch (error:any) {
+            Toast.error(error?.response?.body?.message )
         }
     };
 
