@@ -262,7 +262,7 @@ const TestPage = () => {
     };
 
     return (
-        <div className=" px-4 py-8">
+        <div className="px-4 py-8">
             <Card className="max-w-md ">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold text-center">
