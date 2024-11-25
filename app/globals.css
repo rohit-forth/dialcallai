@@ -207,6 +207,9 @@
   font-weight: 500;
   display: inline-block;
 }
+body {
+  pointer-events: auto !important;
+  }
 
 .auth-page {
   background-image: url("../public/images/background.png");

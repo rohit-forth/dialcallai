@@ -159,6 +159,15 @@ navItems: NavItem[] = [
     ]
   },
   {
+    title: 'Knowledge Base',
+    url: '/knowledgebase',
+    icon: 'KnowledgeBase',
+    isActive: false,
+    items: [
+     
+    ]
+  },
+  {
     title:'Logout',
     url:'#',
     icon:'LogoutRed',
