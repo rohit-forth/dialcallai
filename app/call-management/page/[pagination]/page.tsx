@@ -213,8 +213,8 @@ function DataTableDemo() {
     try {
       let urlSearchParam = new URLSearchParams();
 
-      if (searchParams.get('pagination')) {
-        urlSearchParam.set("pagination", String(Number(searchParams.get('pagination')) - 1));
+      if (searchParams.get('page')) {
+        urlSearchParam.set("pagination", String(Number(searchParams.get('page')) - 1));
       }else{
         urlSearchParam.set("pagination", String(0));
       }
@@ -260,7 +260,11 @@ function DataTableDemo() {
     {
 
       header: "Sr. No.",
-      cell: ({ row }: { row: { index: number } }) => <div className="text-blue-500">{row.index + 1}</div>,
+      cell: ({ row }: { row: { index: number } }) => {
+        const currentPage = Number(searchParams.get("page")) || 1;
+        const pageSize = Number(searchParams.get("limit")) || 10;
+        return Number((currentPage - 1) * pageSize + (row.index + 1));
+      }
     },
     {
       header: "Call ID",

@@ -30,10 +30,6 @@ import {
   Clock,
 } from 'lucide-react';
 import PageContainer from '@/components/layout/page-container';
-import { Icons } from '@/components/icons';
-import {
-  ColumnDef,
-} from '@tanstack/react-table';
 import { DataTable } from '@/components/common/data-table';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -48,25 +44,6 @@ type Message = {
   timestamp: string;
 };
 
-type RecordType = {
-  id: number;
-  type: 'call' | 'chat';
-  srNo: string;
-  phoneNo?: string;
-  dateTime: string;
-  status: string;
-  transcript?: Message[];
-  name?: string;
-  email?: string;
-  phoneNumber?: string;
-  country?: string;
-  chatContent?: Message[];
-  duration?: string;
-  callType?: 'incoming' | 'outgoing';
-  department?: string;
-  agentName?: string;
-  callStatus?: 'completed' | 'missed' | 'ongoing';
-};
 
 const ChatMessage = ({ message }: { message: any }) => (
   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -367,14 +344,14 @@ const Dashboard = () => {
     try {
       let urlSearchParam = new URLSearchParams();
 
-      if (searchParams.get('pagination')) {
-        urlSearchParam.set("pagination", String(Number(searchParams.get('pagination')) - 1));
+      if (searchParams.get('page')) {
+        urlSearchParam.set("pagination", String(Number(searchParams.get('page')) - 1));
       }else{
         urlSearchParam.set("pagination", String(0));
       }
       if (searchParams.get('search')) {
         urlSearchParam.set("search", String(searchParams.get('search')));
-        urlSearchParam.set("pagination", String(Number(0)));
+        //urlSearchParam.set("pagination", String(Number(0)));
       }
      
 
@@ -405,9 +382,12 @@ const Dashboard = () => {
   
   const columns:any = [
     {
-    
       header: 'Sr. No.',
-      cell: ({ row }:{row:any}) => <div className="text-blue-500">{row.index + 1}</div>,
+      cell: ({ row }:{row:any}) => {
+        const currentPage = Number(searchParams.get("page")) || 1;
+        const pageSize = Number(searchParams.get("limit")) || 10;
+        return Number((currentPage - 1) * pageSize + (row.index + 1));
+    }
     },
     {
       accessorKey: 'type',
@@ -541,18 +521,6 @@ const Dashboard = () => {
   }, [searchParams.toString()])
 
 
-  
-
-
-  // const handleViewRecord = async (record: RecordType) => {
-  //   setIsLoading(true);
-  //   setIsSheetOpen(true);
-  //   setSelectedRecord(record);
-
-  //   // Simulate API call
-  //   await new Promise(resolve => setTimeout(resolve, 1000));
-  //   setIsLoading(false);
-  // };
 
   
 
@@ -584,94 +552,11 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Agents Available</p>
-                    <p className="font-medium">{cardData.activeCalls.agentsAvailable}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Timer className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Avg Duration</p>
-                    <p className="font-medium">{cardData.activeCalls.avgDuration}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Longest Wait</p>
-                    <p className="font-medium">{cardData.activeCalls.longestWait}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">In Queue</p>
-                    <p className="font-medium">{cardData.activeCalls.inQueue}</p>
-                  </div>
-                </div>
-              </div> */}
+            
             </CardContent>
           </Card>
 
-          {/* Total Calls Card */}
-          {/* <Card onClick={()=>router.push("/call-management/page/1")} className="group relative overflow-hidden transition-all duration-300 cursor-pointer">
-            <div className="absolute inset-0 bg-green-500/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
-            
-            <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium group-hover:text-green-700 transition-colors duration-300">
-                Total Calls Today
-              </CardTitle>
-              <Phone className="h-4 w-4 text-muted-foreground group-hover:text-green-700 transition-colors duration-300" />
-            </CardHeader>
-            <CardContent className="relative z-10 space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="text-3xl font-bold group-hover:text-green-700 transition-colors duration-300">
-                    {cardData.totalCalls.count}
-                  </div> */}
-          {/* <div className="flex items-center text-sm text-muted-foreground gap-1">
-                    <Timer className="h-4 w-4" />
-                    <span>Avg Handle Time: {cardData.totalCalls.avgHandleTime}</span>
-                  </div> */}
-          {/* </div>
-              </div> */}
-          {/* 
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="flex items-center gap-2">
-                  <PhoneIncoming className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Incoming</p>
-                    <p className="font-medium">{cardData.totalCalls.incoming}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <PhoneOutgoing className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Outgoing</p>
-                    <p className="font-medium">{cardData.totalCalls.outgoing}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <PhoneMissed className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Missed</p>
-                    <p className="font-medium">{cardData.totalCalls.missed}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <UserCheck className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Satisfaction</p>
-                    <p className="font-medium">{cardData.totalCalls.satisfaction}</p>
-                  </div>
-                </div>
-              </div> */}
-          {/* </CardContent>
-          </Card> */}
+       
 
 
           {/* Total Calls Card */}
@@ -738,36 +623,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Avg Response</p>
-                    <p className="font-medium">{cardData.totalChats.avgResponse}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Resolved</p>
-                    <p className="font-medium">{cardData.totalChats.resolved}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <UserCheck className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Satisfaction</p>
-                    <p className="font-medium">{cardData.totalChats.satisfaction}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Waiting</p>
-                    <p className="font-medium">{cardData.totalChats.waitingCustomers}</p>
-                  </div>
-                </div>
-              </div> */}
+          
             </CardContent>
           </Card>
         </div>

@@ -347,11 +347,80 @@ type Message = {
   };
 
 
-const columns:any = [
+
+export type Payment = {
+    id: string
+    job_title: string
+    status: "Completed" | "In progress" | "success" | "failed"
+    created_at:string
+    result:number
+    updated_at:string
+}
+
+
+
+function Contact() {
+  const [isLoading, setIsLoading] = React.useState<boolean>(false)
+
+  const searchParams = useSearchParams()
+ 
+  const [activeTab, setActiveTab] = React.useState("ALL");
+  const [chatState, setChatState] = React.useState<any>({
+    data:[],
+    count:0
+  });
+
+  const initData = async () => {
+    setIsLoading(true);
+    try {
+      let urlSearchParam = new URLSearchParams();
+
+      if (searchParams.get('page')) {
+        urlSearchParam.set("pagination", String(Number(searchParams.get('page')) - 1));
+      }else{
+        urlSearchParam.set("pagination", String(0));
+      }
+      if (searchParams.get('search')) {
+        urlSearchParam.set("search", String(searchParams.get('search')));
+        urlSearchParam.set("pagination", String(Number(0)));
+      }
+      if (activeTab) {
+         if(activeTab!="ALL"){
+
+           urlSearchParam.set("status",activeTab.toString());
+         }
+        } 
+      
+      if (searchParams.get('limit')) {
+        urlSearchParam.set("limit", String(10));
+      }else{
+
+        urlSearchParam.set("limit", String(searchParams.get('limit') ?? 10));
+      }
+      urlSearchParam.set("type", "CHAT");
+
+
+      let apiRes = await henceforthApi.SuperAdmin.callListing(
+        urlSearchParam.toString()
+      )
+      setChatState(apiRes);
+
+    } catch (error) {
+      console.error(error);
+    }
+    finally{
+      setIsLoading(false);
+    }
+  }
+
+
+  const columns:any = [
     {
       header:"Sr. No.",
       cell: ({ row }: { row: { index: number; original: RecordType } }) => {
-        return <span>{row.index + 1}</span>; 
+        const currentPage = Number(searchParams.get("page")) || 1;
+        const pageSize = Number(searchParams.get("limit")) || 10;
+        return Number((currentPage - 1) * pageSize + (row.index + 1));
       },
     //   enableSorting: false,
     //   enableHiding: false,
@@ -470,70 +539,6 @@ const columns:any = [
   
   
   ]
-export type Payment = {
-    id: string
-    job_title: string
-    status: "Completed" | "In progress" | "success" | "failed"
-    created_at:string
-    result:number
-    updated_at:string
-}
-
-
-
-function Contact() {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false)
-
-  const searchParams = useSearchParams()
- 
-  const [activeTab, setActiveTab] = React.useState("ALL");
-  const [chatState, setChatState] = React.useState<any>({
-    data:[],
-    count:0
-  });
-
-  const initData = async () => {
-    setIsLoading(true);
-    try {
-      let urlSearchParam = new URLSearchParams();
-
-      if (searchParams.get('pagination')) {
-        urlSearchParam.set("pagination", String(Number(searchParams.get('pagination')) - 1));
-      }else{
-        urlSearchParam.set("pagination", String(0));
-      }
-      if (searchParams.get('search')) {
-        urlSearchParam.set("search", String(searchParams.get('search')));
-        urlSearchParam.set("pagination", String(Number(0)));
-      }
-      if (activeTab) {
-         if(activeTab!="ALL"){
-
-           urlSearchParam.set("status",activeTab.toString());
-         }
-        } 
-      
-      if (searchParams.get('limit')) {
-        urlSearchParam.set("limit", String(10));
-      }else{
-
-        urlSearchParam.set("limit", String(searchParams.get('limit') ?? 10));
-      }
-      urlSearchParam.set("type", "CHAT");
-
-
-      let apiRes = await henceforthApi.SuperAdmin.callListing(
-        urlSearchParam.toString()
-      )
-      setChatState(apiRes);
-
-    } catch (error) {
-      console.error(error);
-    }
-    finally{
-      setIsLoading(false);
-    }
-  }
   const skeletonColumns = columns.map((column:any) => ({
     ...column,
     cell: () => <Skeleton className="h-8 w-full" />
