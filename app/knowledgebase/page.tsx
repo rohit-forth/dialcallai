@@ -413,6 +413,16 @@ const KnowledgeBase = () => {
    // setUploadState({ isUploading: false, uploadedFile: null });
   };
 
+  async function getPrompt(){
+    try{
+      const response = await fetch("https://dial-ai.henceforthsolutions.com:3002/pinecone/prompt");
+      const data = await response?.json();
+      setDiyContent(data?.prompt)
+    }catch(err){
+      console.log(err)
+    }
+  }
+
   return (
     <>
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-6">
@@ -445,8 +455,8 @@ const KnowledgeBase = () => {
                     <Upload className="mr-2 h-4 w-4" /> Upload Files
                     <input type="file" id="file-upload" multiple className="hidden" onChange={handleFileUpload} accept=".pdf,.doc,.docx,.txt" />
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setShowDIYDialog(true)}>
-                    <FileText className="mr-2 h-4 w-4" /> Create Prompt
+                  <DropdownMenuItem onSelect={() => {setShowDIYDialog(true);getPrompt()}}>
+                    <FileText className="mr-2 h-4 w-4" /> Edit Prompt
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => setShowUrlDialog(true)}>
                     <Link2 className="mr-2 h-4 w-4" /> Add from URL
