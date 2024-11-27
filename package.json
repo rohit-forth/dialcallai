@@ -1,5 +1,5 @@
 {
-  "name": "nextshcdndashboardstarter",
+  "name": "dialaivendor",
   "version": "1.0.0",
   "private": true,
   "author": {
@@ -81,6 +81,8 @@
     "pdfjs-dist": "^3.11.174",
     "postcss": "8.4.28",
     "react": "^18.2.0",
+    "react-color": "^2.19.3",
+    "react-colorful": "^5.6.1",
     "react-day-picker": "^8.9.1",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
@@ -109,6 +111,7 @@
     "@faker-js/faker": "^9.0.3",
     "@types/pdf-parse": "^1.1.4",
     "@types/pdfjs-dist": "^2.10.378",
+    "@types/react-color": "^3.0.12",
     "@types/sort-by": "^1.2.3",
     "@types/superagent": "^8.1.9",
     "@types/uuid": "^9.0.7",
