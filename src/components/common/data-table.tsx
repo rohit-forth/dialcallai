@@ -91,15 +91,15 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="space-y-4">
-      <ScrollArea className="h-100 rounded-md border border-common md:h-100">
+    <div className=" rounded-md border border-common">
+      {/* <ScrollArea className=" rounded-md border border-common md:h-100"> */}
         <Table className="relative">
           
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className='whitespace-nowrap'>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -119,7 +119,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell className='whitespace-nowrap' key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -140,11 +140,11 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+        {/* <ScrollBar orientation="horizontal" /> */}
+      {/* </ScrollArea> */}
 
-      <div className="flex flex-col items-center justify-end gap-2 space-x-2 py-4 sm:flex-row">
-        <div className="flex w-full items-center justify-between">
+      <div className="flex flex-col items-center justify-between gap-2 space-x-2 py-4 sm:flex-row mx-4">
+        <div className="flex w-full items-center ">
           <div className="flex-1 text-sm text-muted-foreground">
             {totalItems > 0 ? (
               <>
@@ -160,7 +160,7 @@ export function DataTable<TData, TValue>({
               'No entries found'
             )}
           </div>
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
+          {/* <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
             <div className="flex items-center space-x-2">
               <p className="whitespace-nowrap text-sm font-medium">
                 Rows per page
@@ -183,7 +183,7 @@ export function DataTable<TData, TValue>({
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </div> */}
         </div>
         <div className="flex w-full items-center justify-between gap-2 sm:justify-end">
           <div className="flex w-[150px] items-center justify-center text-sm font-medium">

@@ -615,13 +615,13 @@ const KnowledgeBase = () => {
                         onClick={() => setIsEditing(true)}
                         variant="outline"
                         size="sm"
-                        disabled={selectedDoc?.type.toLowerCase() !== "txt"}
+                        disabled={selectedDoc?.type.toLowerCase()==="DOCX"||selectedDoc?.type.toLowerCase()==="docx"}
                         className="hover:bg-blue-50"
                       >
                         <Pencil className="mr-2 h-4 w-4" /> Edit
                       </Button>
                     ) : (
-                      <div className="space-x-2">
+                      <div className="space-x-2 flex">
                         <Button
                           onClick={() => setIsEditing(false)}
                           variant="outline"
@@ -647,10 +647,10 @@ const KnowledgeBase = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="text-sm text-gray-500">
-                        Last modified: {new Date(selectedDoc.timestamp).toLocaleString()}
+                        Last modified: {new Date(selectedDoc?.timestamp||new Date(selectedDoc?.updated_at)).toLocaleString()}
                       </div>
                       <div className="text-sm text-gray-500">
-                        Type: {selectedDoc.type.toUpperCase()}
+                        Type: {selectedDoc?.type?.toUpperCase()}
                       </div>
                     </div>
                     {isEditing ? (
@@ -673,7 +673,7 @@ const KnowledgeBase = () => {
                       </div>
                     ) : (
                       <div className="prose max-w-none bg-white p-4 min-h-[calc(100vh-40vh)] max-h-[calc(100vh-40vh)] overflow-y-scroll overflow-x-hidden rounded-lg border ">
-                        {selectedDoc.type === 'txt' ? (
+                        {(selectedDoc?.content && selectedDoc.type !== 'DOCX' && selectedDoc.type !== 'docx') ? (
                           <div
                             className="whitespace-pre-wrap text-wrap font-mono text-sm"
                             dangerouslySetInnerHTML={{ __html: selectedDoc?.content }}

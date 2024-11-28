@@ -574,9 +574,9 @@ function Contact() {
     const pathname = usePathname();
 
     return (
-        <PageContainer>
+        <PageContainer scrollable>
 
-            <div className="container mx-auto px-6 py-2">
+            <div className=" mx-auto px-6 py-2">
                 <div>
                     <p className="heading mb-3">{"Chat"}</p>
                 </div>
@@ -632,7 +632,7 @@ function Contact() {
 
           <TabsContent value="ALL" className="mt-4">
            
-            <div className="mx-auto">
+            <div className="">
             {isLoading ? (
                 <DataTable
                   columns={skeletonColumns}
